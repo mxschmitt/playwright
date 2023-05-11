@@ -418,3 +418,15 @@ test('should be able to connect via localhost', async ({ browserType }, testInfo
     await browserServer.close();
   }
 });
+
+test('should send the custom headers when WS endpoint gets resolved', async ({ browserType, server }) => {
+  const [request] = await Promise.all([
+    server.waitForRequest('/json/version/'),
+    browserType.connectOverCDP(server.PREFIX, {
+      headers: {
+        'foo': 'bar'
+      },
+    }).catch(() => {}),
+  ]);
+  expect(request.headers['foo']).toBe('bar');
+});
