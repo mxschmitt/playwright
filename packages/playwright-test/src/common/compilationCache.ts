@@ -19,6 +19,8 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { sourceMapSupport } from '../utilsBundle';
+import { mainThreadSender } from '../experimentalLoader';
+import { ipcReceiver } from '../experimentalLoaderIPC';
 
 export type MemoryCache = {
   codePath: string;
@@ -66,7 +68,16 @@ sourceMapSupport.install({
 function _innerAddToCompilationCache(filename: string, options: { codePath: string, sourceMapPath: string, moduleUrl?: string }) {
   sourceMaps.set(options.moduleUrl || filename, options.sourceMapPath);
   memoryCache.set(filename, options);
+  mainThreadSender?.send('sourceMaps', { key: options.moduleUrl || filename, value: options.sourceMapPath });
 }
+
+ipcReceiver?.on('sourceMaps', (message: { key: string, value: string }) => sourceMaps.set(message.key, message.value));
+ipcReceiver?.on('fileDependencies', (message: { key: string, value: string[] }) => fileDependencies.set(message.key, new Set(message.value)));
+ipcReceiver?.on('depsCollector', items => {
+  depsCollector?.clear();
+  for (const item of items)
+    depsCollector?.add(item);
+});
 
 export function getFromCompilationCache(filename: string, code: string, moduleUrl?: string): { cachedCode?: string, addToCache?: (code: string, map?: any) => void } {
   // First check the memory cache by filename, this cache will always work in the worker,
@@ -115,8 +126,10 @@ export function addToCompilationCache(payload: any) {
     sourceMaps.set(entry[0], entry[1]);
   for (const entry of payload.memoryCache)
     memoryCache.set(entry[0], entry[1]);
-  for (const entry of payload.fileDependencies)
+  for (const entry of payload.fileDependencies) {
     fileDependencies.set(entry[0], new Set(entry[1]));
+    mainThreadSender?.send('fileDependencies', { key: entry[0], value: entry[1] });
+  }
   for (const entry of payload.externalDependencies)
     externalDependencies.set(entry[0], new Set(entry[1]));
 }
@@ -138,6 +151,7 @@ function calculateCachePath(content: string, filePath: string, isModule: boolean
 let depsCollector: Set<string> | undefined;
 
 export function startCollectingFileDeps() {
+  console.log('startCollectingFileDeps');
   depsCollector = new Set();
 }
 
@@ -149,12 +163,61 @@ export function stopCollectingFileDeps(filename: string) {
     if (belongsToNodeModules(dep))
       depsCollector.delete(dep);
   }
+  console.log('fileDependencies2', filename, [...depsCollector]);
   fileDependencies.set(filename, depsCollector);
+  mainThreadSender?.send('fileDependencies', { key: filename, value: [...depsCollector] });
   depsCollector = undefined;
+  
+}
+
+
+class ObservedSet<T> implements Set<T> {
+  constructor(private readonly base: Set<T>, private readonly callback: (value: Set<T>) => void) { }
+  add(value: T): this {
+    this.base.add(value);
+    this.callback(this.base);
+    return this;
+  }
+  clear(): void {
+    this.base.clear();
+    this.callback(this.base);
+  }
+  delete(value: T): boolean {
+    const removed = this.base.delete(value);
+    this.callback(this.base);
+    return removed;
+  }
+  forEach(callbackfn: (value: T, value2: T, set: Set<T>) => void, thisArg?: any): void {
+    return this.base.forEach(callbackfn, thisArg);
+  }
+  has(value: T): boolean {
+    return this.base.has(value);
+  }
+  get size(): number {
+    return this.base.size;
+  }
+  entries(): IterableIterator<[T, T]> {
+    return this.base.entries();
+  }
+  keys(): IterableIterator<T> {
+    return this.base.keys();
+  }
+  values(): IterableIterator<T> {
+    return this.base.values();
+  }
+  [Symbol.iterator](): IterableIterator<T> {
+    return this.base[Symbol.iterator]();
+  }
+  get [Symbol.toStringTag]() {
+    return this.base[Symbol.toStringTag];
+  }
 }
 
 export function currentFileDepsCollector(): Set<string> | undefined {
-  return depsCollector;
+  console.log('currentFileDepsCollector', depsCollector)
+  if (!depsCollector)
+    return;
+  return new ObservedSet(depsCollector, deps => mainThreadSender?.send('depsCollector', deps));
 }
 
 export function setExternalDependencies(filename: string, deps: string[]) {

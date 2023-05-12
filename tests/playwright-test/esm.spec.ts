@@ -382,6 +382,7 @@ test('should resolve .js import to .tsx file in ESM mode for components', async 
     `,
 
     'src/test.spec.tsx': `
+      import * as React from 'react';
       import { test, expect } from '@playwright/experimental-ct-react';
       import { Button } from './button.js';
       test('pass', async ({ mount }) => {

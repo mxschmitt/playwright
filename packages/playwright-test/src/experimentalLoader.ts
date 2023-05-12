@@ -18,6 +18,7 @@ import fs from 'fs';
 import url from 'url';
 import { belongsToNodeModules, currentFileDepsCollector } from './common/compilationCache';
 import { transformHook, resolveHook } from './common/transform';
+import { LoaderIPCSender } from './experimentalLoaderIPC';
 
 // Node < 18.6: defaultResolve takes 3 arguments.
 // Node >= 18.6: nextResolve from the chain takes 2 arguments.
@@ -31,6 +32,7 @@ async function resolve(specifier: string, context: { parentURL?: string }, defau
   const result = await defaultResolve(specifier, context, defaultResolve);
   if (result?.url && result.url.startsWith('file://'))
     currentFileDepsCollector()?.add(url.fileURLToPath(result.url));
+
 
   return result;
 }
@@ -59,4 +61,11 @@ async function load(moduleUrl: string, context: { format?: string }, defaultLoad
   return { format: context.format || 'module', source, shortCircuit: true };
 }
 
-module.exports = { resolve, load };
+export let mainThreadSender: LoaderIPCSender | undefined;
+
+export function globalPreload({ port }: { port: MessagePort }): string {
+  mainThreadSender = new LoaderIPCSender(port);
+  return `globalThis.__playwrightLoaderMessagePort = port;`;
+}
+
+module.exports = { resolve, load, globalPreload };

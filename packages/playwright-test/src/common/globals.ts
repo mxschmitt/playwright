@@ -59,6 +59,7 @@ export function setIsWorkerProcess() {
 }
 
 export function isWorkerProcess() {
+  console.log("_isWorkerProcess", _isWorkerProcess);
   return _isWorkerProcess;
 }
 
