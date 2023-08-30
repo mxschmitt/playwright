@@ -745,6 +745,8 @@ DebugController:
             - recording
             - none
         testIdAttributeName: string?
+        launchOptions: BrowserTypeLaunchOptions?
+        contextOptions: BrowserNewContextForReuseParams?
 
     highlight:
       parameters:

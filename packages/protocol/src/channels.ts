@@ -709,9 +709,13 @@ export type DebugControllerNavigateResult = void;
 export type DebugControllerSetRecorderModeParams = {
   mode: 'inspecting' | 'recording' | 'none',
   testIdAttributeName?: string,
+  launchOptions?: BrowserTypeLaunchOptions,
+  contextOptions?: BrowserNewContextForReuseParams,
 };
 export type DebugControllerSetRecorderModeOptions = {
   testIdAttributeName?: string,
+  launchOptions?: BrowserTypeLaunchOptions,
+  contextOptions?: BrowserNewContextForReuseParams,
 };
 export type DebugControllerSetRecorderModeResult = void;
 export type DebugControllerHighlightParams = {

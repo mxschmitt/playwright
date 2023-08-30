@@ -54,6 +54,7 @@ export default defineConfig({
       /* Project-specific settings. */
       use: {
         ...devices['Desktop Chrome'],
+        channel: 'msedge'
       },
     },
 
