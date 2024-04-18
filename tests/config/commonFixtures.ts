@@ -26,7 +26,7 @@ type TestChildParams = {
   cwd?: string,
   env?: NodeJS.ProcessEnv,
   shell?: boolean,
-  onOutput?: () => void;
+  onOutput?: (chunk: string | Buffer) => void;
 };
 
 import childProcess from 'child_process';
