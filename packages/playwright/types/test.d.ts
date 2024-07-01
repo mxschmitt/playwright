@@ -4823,6 +4823,7 @@ export type Fixtures<T extends KeyValue = {}, W extends KeyValue = {}, PT extend
 type BrowserName = 'chromium' | 'firefox' | 'webkit';
 type BrowserChannel = Exclude<LaunchOptions['channel'], undefined>;
 type ColorScheme = Exclude<BrowserContextOptions['colorScheme'], undefined>;
+type ClientCertificate = Exclude<BrowserContextOptions['clientCertificates'], undefined>[0];
 type ExtraHTTPHeaders = Exclude<BrowserContextOptions['extraHTTPHeaders'], undefined>;
 type Proxy = Exclude<BrowserContextOptions['proxy'], undefined>;
 type StorageState = Exclude<BrowserContextOptions['storageState'], undefined>;
@@ -5200,6 +5201,73 @@ export interface PlaywrightTestOptions {
    *
    */
   colorScheme: ColorScheme;
+  /**
+   * Optionally override the trusted CA certificates. Default is to trust the well-known CAs curated by Mozilla.
+   * Mozilla's CAs are completely replaced when CAs are explicitly specified using this option. Any string or Buffer can
+   * contain multiple PEM CAs concatenated together. The peer's certificate must be chainable to a CA trusted by the
+   * server for the connection to be authenticated. When using certificates that are not chainable to a well-known CA,
+   * the certificate's CA must be explicitly specified as a trusted or the connection will fail to authenticate. If the
+   * peer uses a certificate that doesn't match or chain to one of the default CAs, use the ca option to provide a CA
+   * certificate that the peer's certificate can match or chain to. For self-signed certificates, the certificate is its
+   * own CA, and must be provided. For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509
+   * CERTIFICATE", and "CERTIFICATE".
+   *
+   * **Usage**
+   *
+   * ```js
+   * // playwright.config.ts
+   * import { defineConfig } from '@playwright/test';
+   *
+   * export default defineConfig({
+   *   projects: [
+   *     {
+   *       name: 'Microsoft Edge',
+   *       use: {
+   *         ...devices['Desktop Edge'],
+   *         ca: ['path/to/ca.pem'],
+   *       },
+   *     },
+   *   ]
+   * });
+   * ```
+   *
+   */
+  ca: string[];
+  /**
+   * An array of client certificates to be used with the {@link APIRequestContext}. Each certificate object must have
+   * `cert` and `key` or `pfx` to load the client certificate. Optionally, `passphrase` property should be provided if
+   * the private key is encrypted. If the certificate is issued by a custom certificate authority, the `ca` property
+   * should be provided with the path to the file with the certificate authority's certificate. If the certificate is
+   * valid only for specific URLs, the `url` property should be provided with a glob pattern to match the URLs that the
+   * certificate is valid for.
+   *
+   * **Usage**
+   *
+   * ```js
+   * // playwright.config.ts
+   * import { defineConfig } from '@playwright/test';
+   *
+   * export default defineConfig({
+   *   projects: [
+   *     {
+   *       name: 'Microsoft Edge',
+   *       use: {
+   *         ...devices['Desktop Edge'],
+   *         clientCertificates: [{
+   *           url: 'https://example.com',
+   *           certs: [{
+   *             cert: 'client/alice_cert.pem',
+   *             key: 'client/alice_key.pem',
+   *           }],
+   *         }],
+   *       },
+   *     },
+   *   ]
+   * });
+   * ```
+   *
+   */
+  clientCertificates: ClientCertificate[];
   /**
    * Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
    * [emulating devices with device scale factor](https://playwright.dev/docs/emulation#devices).

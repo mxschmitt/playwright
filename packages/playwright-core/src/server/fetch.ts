@@ -40,6 +40,7 @@ import { Tracing } from './trace/recorder/tracing';
 import type * as types from './types';
 import type { HeadersArray, ProxySettings } from './types';
 import { kMaxCookieExpiresDateInSeconds } from './network';
+import { clientCertificatesToTLSOptions } from './socksClientCertificatesInterceptor';
 
 type FetchRequestOptions = {
   userAgent: string;
@@ -49,6 +50,8 @@ type FetchRequestOptions = {
   timeoutSettings: TimeoutSettings;
   ignoreHTTPSErrors?: boolean;
   baseURL?: string;
+  ca?: Buffer[];
+  clientCertificates?: channels.BrowserNewContextOptions['clientCertificates'];
 };
 
 type HeadersObject = Readonly<{ [name: string]: string }>;
@@ -190,9 +193,11 @@ export abstract class APIRequestContext extends SdkObject {
       maxRedirects: params.maxRedirects === 0 ? -1 : params.maxRedirects === undefined ? 20 : params.maxRedirects,
       timeout,
       deadline,
+      ca: this._defaultOptions().ca,
+      ...clientCertificatesToTLSOptions(this._defaultOptions().clientCertificates, requestUrl.toString()),
       __testHookLookup: (params as any).__testHookLookup,
     };
-    // rejectUnauthorized = undefined is treated as true in node 12.
+    // rejectUnauthorized = undefined is treated as true in Node.js 12.
     if (params.ignoreHTTPSErrors || defaults.ignoreHTTPSErrors)
       options.rejectUnauthorized = false;
 
@@ -351,6 +356,8 @@ export abstract class APIRequestContext extends SdkObject {
             maxRedirects: options.maxRedirects - 1,
             timeout: options.timeout,
             deadline: options.deadline,
+            ca: this._defaultOptions().ca,
+            ...clientCertificatesToTLSOptions(this._defaultOptions().clientCertificates, url.toString()),
             __testHookLookup: options.__testHookLookup,
           };
           // rejectUnauthorized = undefined is treated as true in node 12.
@@ -522,6 +529,8 @@ export class BrowserContextAPIRequestContext extends APIRequestContext {
       timeoutSettings: this._context._timeoutSettings,
       ignoreHTTPSErrors: this._context._options.ignoreHTTPSErrors,
       baseURL: this._context._options.baseURL,
+      clientCertificates: this._context._options.clientCertificates,
+      ca: this._context._options.ca,
     };
   }
 
@@ -568,6 +577,8 @@ export class GlobalAPIRequestContext extends APIRequestContext {
       extraHTTPHeaders: options.extraHTTPHeaders,
       ignoreHTTPSErrors: !!options.ignoreHTTPSErrors,
       httpCredentials: options.httpCredentials,
+      ca: options.ca,
+      clientCertificates: options.clientCertificates,
       proxy,
       timeoutSettings,
     };

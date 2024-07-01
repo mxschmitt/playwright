@@ -15651,6 +15651,56 @@ export interface APIRequest {
     baseURL?: string;
 
     /**
+     * Optionally override the trusted CA certificates. Default is to trust the well-known CAs curated by Mozilla.
+     * Mozilla's CAs are completely replaced when CAs are explicitly specified using this option. Any string or Buffer can
+     * contain multiple PEM CAs concatenated together. The peer's certificate must be chainable to a CA trusted by the
+     * server for the connection to be authenticated. When using certificates that are not chainable to a well-known CA,
+     * the certificate's CA must be explicitly specified as a trusted or the connection will fail to authenticate. If the
+     * peer uses a certificate that doesn't match or chain to one of the default CAs, use the ca option to provide a CA
+     * certificate that the peer's certificate can match or chain to. For self-signed certificates, the certificate is its
+     * own CA, and must be provided. For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509
+     * CERTIFICATE", and "CERTIFICATE".
+     */
+    ca?: Array<string>;
+
+    /**
+     * An array of client certificates to be used with the {@link APIRequestContext}. Each certificate object must have
+     * `cert` and `key` or `pfx` to load the client certificate. Optionally, `passphrase` property should be provided if
+     * the private key is encrypted. If the certificate is issued by a custom certificate authority, the `ca` property
+     * should be provided with the path to the file with the certificate authority's certificate. If the certificate is
+     * valid only for specific URLs, the `url` property should be provided with a glob pattern to match the URLs that the
+     * certificate is valid for.
+     */
+    clientCertificates?: Array<{
+      /**
+       * Glob pattern to match the URLs that the certificate is valid for.
+       */
+      url: string;
+
+      certs: Array<{
+        /**
+         * Path to the file with the certificate in PEM format.
+         */
+        cert?: string;
+
+        /**
+         * Path to the file with the private key in PEM format.
+         */
+        key?: string;
+
+        /**
+         * Passphrase for the private key.
+         */
+        passphrase?: string;
+
+        /**
+         * PFX or PKCS12 encoded private key and certificate chain.
+         */
+        pfx?: string;
+      }>;
+    }>;
+
+    /**
      * An object containing additional HTTP headers to be sent with every request. Defaults to none.
      */
     extraHTTPHeaders?: { [key: string]: string; };
@@ -16800,6 +16850,56 @@ export interface Browser extends EventEmitter {
      * Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
      */
     bypassCSP?: boolean;
+
+    /**
+     * Optionally override the trusted CA certificates. Default is to trust the well-known CAs curated by Mozilla.
+     * Mozilla's CAs are completely replaced when CAs are explicitly specified using this option. Any string or Buffer can
+     * contain multiple PEM CAs concatenated together. The peer's certificate must be chainable to a CA trusted by the
+     * server for the connection to be authenticated. When using certificates that are not chainable to a well-known CA,
+     * the certificate's CA must be explicitly specified as a trusted or the connection will fail to authenticate. If the
+     * peer uses a certificate that doesn't match or chain to one of the default CAs, use the ca option to provide a CA
+     * certificate that the peer's certificate can match or chain to. For self-signed certificates, the certificate is its
+     * own CA, and must be provided. For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509
+     * CERTIFICATE", and "CERTIFICATE".
+     */
+    ca?: Array<string>;
+
+    /**
+     * An array of client certificates to be used with the {@link APIRequestContext}. Each certificate object must have
+     * `cert` and `key` or `pfx` to load the client certificate. Optionally, `passphrase` property should be provided if
+     * the private key is encrypted. If the certificate is issued by a custom certificate authority, the `ca` property
+     * should be provided with the path to the file with the certificate authority's certificate. If the certificate is
+     * valid only for specific URLs, the `url` property should be provided with a glob pattern to match the URLs that the
+     * certificate is valid for.
+     */
+    clientCertificates?: Array<{
+      /**
+       * Glob pattern to match the URLs that the certificate is valid for.
+       */
+      url: string;
+
+      certs: Array<{
+        /**
+         * Path to the file with the certificate in PEM format.
+         */
+        cert?: string;
+
+        /**
+         * Path to the file with the private key in PEM format.
+         */
+        key?: string;
+
+        /**
+         * Passphrase for the private key.
+         */
+        passphrase?: string;
+
+        /**
+         * PFX or PKCS12 encoded private key and certificate chain.
+         */
+        pfx?: string;
+      }>;
+    }>;
 
     /**
      * Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
@@ -20209,6 +20309,56 @@ export interface BrowserContextOptions {
    * Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
    */
   bypassCSP?: boolean;
+
+  /**
+   * Optionally override the trusted CA certificates. Default is to trust the well-known CAs curated by Mozilla.
+   * Mozilla's CAs are completely replaced when CAs are explicitly specified using this option. Any string or Buffer can
+   * contain multiple PEM CAs concatenated together. The peer's certificate must be chainable to a CA trusted by the
+   * server for the connection to be authenticated. When using certificates that are not chainable to a well-known CA,
+   * the certificate's CA must be explicitly specified as a trusted or the connection will fail to authenticate. If the
+   * peer uses a certificate that doesn't match or chain to one of the default CAs, use the ca option to provide a CA
+   * certificate that the peer's certificate can match or chain to. For self-signed certificates, the certificate is its
+   * own CA, and must be provided. For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509
+   * CERTIFICATE", and "CERTIFICATE".
+   */
+  ca?: Array<string>;
+
+  /**
+   * An array of client certificates to be used with the {@link APIRequestContext}. Each certificate object must have
+   * `cert` and `key` or `pfx` to load the client certificate. Optionally, `passphrase` property should be provided if
+   * the private key is encrypted. If the certificate is issued by a custom certificate authority, the `ca` property
+   * should be provided with the path to the file with the certificate authority's certificate. If the certificate is
+   * valid only for specific URLs, the `url` property should be provided with a glob pattern to match the URLs that the
+   * certificate is valid for.
+   */
+  clientCertificates?: Array<{
+    /**
+     * Glob pattern to match the URLs that the certificate is valid for.
+     */
+    url: string;
+
+    certs: Array<{
+      /**
+       * Path to the file with the certificate in PEM format.
+       */
+      cert?: string;
+
+      /**
+       * Path to the file with the private key in PEM format.
+       */
+      key?: string;
+
+      /**
+       * Passphrase for the private key.
+       */
+      passphrase?: string;
+
+      /**
+       * PFX or PKCS12 encoded private key and certificate chain.
+       */
+      pfx?: string;
+    }>;
+  }>;
 
   /**
    * Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See

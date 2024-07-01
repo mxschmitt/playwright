@@ -42,6 +42,7 @@ import * as consoleApiSource from '../generated/consoleApiSource';
 import { BrowserContextAPIRequestContext } from './fetch';
 import type { Artifact } from './artifact';
 import { Clock } from './clock';
+import { shouldUseMitmSocksProxy, type ClientCertificatesProxy } from './socksClientCertificatesInterceptor';
 
 export abstract class BrowserContext extends SdkObject {
   static Events = {
@@ -89,6 +90,7 @@ export abstract class BrowserContext extends SdkObject {
   private _debugger!: Debugger;
   _closeReason: string | undefined;
   readonly clock: Clock;
+  private _socksServer: ClientCertificatesProxy | undefined;
 
   constructor(browser: Browser, options: channels.BrowserNewContextParams, browserContextId: string | undefined) {
     super(browser, 'browser-context');
@@ -445,6 +447,8 @@ export abstract class BrowserContext extends SdkObject {
         await harRecorder.flush();
       await this.tracing.flush();
 
+      this._socksServer?.close();
+
       // Cleanup.
       const promises: Promise<void>[] = [];
       for (const { context, artifact } of this._browser._idToVideo.values()) {
@@ -607,6 +611,10 @@ export abstract class BrowserContext extends SdkObject {
     }
   }
 
+  setSocksServer(socksServer: ClientCertificatesProxy) {
+    this._socksServer = socksServer;
+  }
+
   async extendInjectedScript(source: string, arg?: any) {
     const installInFrame = (frame: frames.Frame) => frame.extendInjectedScript(source, arg).catch(() => {});
     const installInPage = (page: Page) => {
@@ -685,6 +693,8 @@ export function validateBrowserContextOptions(options: channels.BrowserNewContex
       throw new Error(`Browser needs to be launched with the global proxy. If all contexts override the proxy, global proxy will be never used and can be any string, for example "launch({ proxy: { server: 'http://per-context' } })"`);
     options.proxy = normalizeProxySettings(options.proxy);
   }
+  if (shouldUseMitmSocksProxy(options))
+    options.ignoreHTTPSErrors = true;
   verifyGeolocation(options.geolocation);
 }
 

@@ -25,10 +25,11 @@ import { assert, headersObjectToArray, isString } from '../utils';
 import { mkdirIfNeeded } from '../utils/fileUtils';
 import { ChannelOwner } from './channelOwner';
 import { RawHeaders } from './network';
-import type { FilePayload, Headers, StorageState } from './types';
+import type { ClientCertificate, FilePayload, Headers, StorageState } from './types';
 import type { Playwright } from './playwright';
 import { Tracing } from './tracing';
 import { TargetClosedError, isTargetClosedError } from './errors';
+import { toCAProtocol, toClientCertificatesProtocol } from './browserContext';
 
 export type FetchOptions = {
   params?: { [key: string]: string; },
@@ -44,9 +45,11 @@ export type FetchOptions = {
   maxRetries?: number,
 };
 
-type NewContextOptions = Omit<channels.PlaywrightNewRequestOptions, 'extraHTTPHeaders' | 'storageState' | 'tracesDir'> & {
+type NewContextOptions = Omit<channels.PlaywrightNewRequestOptions, 'extraHTTPHeaders' | 'ca' | 'clientCertificates' | 'storageState' | 'tracesDir'> & {
   extraHTTPHeaders?: Headers,
   storageState?: string | StorageState,
+  ca?: string[];
+  clientCertificates?: ClientCertificate[];
 };
 
 type RequestWithBodyOptions = Omit<FetchOptions, 'method'>;
@@ -74,6 +77,8 @@ export class APIRequest implements api.APIRequest {
       extraHTTPHeaders: options.extraHTTPHeaders ? headersObjectToArray(options.extraHTTPHeaders) : undefined,
       storageState,
       tracesDir,
+      ca: await toCAProtocol(options.ca),
+      clientCertificates: await toClientCertificatesProtocol(options.clientCertificates),
     })).request);
     this._contexts.add(context);
     context._request = this;
@@ -175,7 +180,7 @@ export class APIRequestContext extends ChannelOwner<channels.APIRequestContextCh
       const params = objectToArray(options.params);
       const method = options.method || options.request?.method();
       // Cannot call allHeaders() here as the request may be paused inside route handler.
-      const headersObj = options.headers || options.request?.headers() ;
+      const headersObj = options.headers || options.request?.headers();
       const headers = headersObj ? headersObjectToArray(headersObj) : undefined;
       let jsonData: any;
       let formData: channels.NameValue[] | undefined;
@@ -395,7 +400,7 @@ function isJsonContentType(headers?: HeadersArray): boolean {
   return false;
 }
 
-function objectToArray(map?:  { [key: string]: any }): NameValue[] | undefined {
+function objectToArray(map?: { [key: string]: any }): NameValue[] | undefined {
   if (!map)
     return undefined;
   const result = [];

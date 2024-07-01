@@ -138,6 +138,55 @@ export default defineConfig({
   ]
 });
 ```
+
+## property: TestOptions.ca = %%-context-option-ca-%%
+* since: 1.46
+
+**Usage**
+
+```js title="playwright.config.ts"
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  projects: [
+    {
+      name: 'Microsoft Edge',
+      use: {
+        ...devices['Desktop Edge'],
+        ca: ['path/to/ca.pem'],
+      },
+    },
+  ]
+});
+```
+
+## property: TestOptions.clientCertificates = %%-context-option-clientCertificates-%%
+* since: 1.46
+
+**Usage**
+
+```js title="playwright.config.ts"
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  projects: [
+    {
+      name: 'Microsoft Edge',
+      use: {
+        ...devices['Desktop Edge'],
+        clientCertificates: [{
+          url: 'https://example.com',
+          certs: [{
+            cert: 'client/alice_cert.pem',
+            key: 'client/alice_key.pem',
+          }],
+        }],
+      },
+    },
+  ]
+});
+```
+
 ## property: TestOptions.colorScheme = %%-context-option-colorscheme-%%
 * since: v1.10
 
