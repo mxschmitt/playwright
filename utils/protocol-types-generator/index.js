@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Microsoft Corporation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 // @ts-check
 const path = require('path');
 const fs = require('fs');
@@ -29,7 +44,7 @@ async function generateChromiumProtocol(executablePath) {
 async function generateWebKitProtocol(folderPath) {
   const outputPath = path.join(__dirname, '../../packages/playwright-core/src/server/webkit/protocol.d.ts');
   const json = JSON.parse(await fs.promises.readFile(path.join(folderPath, '../protocol.json'), 'utf8'));
-  await fs.promises.writeFile(outputPath, jsonToTS({domains: json}));
+  await fs.promises.writeFile(outputPath, jsonToTS({ domains: json }));
   console.log(`Wrote protocol.d.ts for WebKit to ${path.relative(process.cwd(), outputPath)}`);
 }
 
@@ -110,8 +125,10 @@ export module Protocol {${json.domains.map(domain => `${domain.description ? `
  * @param {string=} domain
  */
 function typeOfProperty(property, domain) {
-  if (property.$ref) return property.$ref.includes('.') || !domain ? property.$ref : domain + '.' + property.$ref;
-  if (property.enum) return property.enum.map(value => JSON.stringify(value)).join('|');
+  if (property.$ref)
+    return property.$ref.includes('.') || !domain ? property.$ref : domain + '.' + property.$ref;
+  if (property.enum)
+    return property.enum.map(value => JSON.stringify(value)).join('|');
   switch (property.type) {
     case 'array':
       return typeOfProperty(property.items, domain) + '[]';
@@ -128,43 +145,43 @@ async function generateFirefoxProtocol(executablePath) {
   const omnija = os.platform() === 'darwin' ?
     path.join(executablePath, '../../Resources/omni.ja') :
     path.join(executablePath, '../omni.ja');
-  const zip = new StreamZip({file: omnija, storeEntries: true});
+  const zip = new StreamZip({ file: omnija, storeEntries: true });
   // @ts-ignore
   await new Promise(x => zip.on('ready', x));
-  const data = zip.entryDataSync(zip.entry('chrome/juggler/content/protocol/Protocol.js'))
+  const data = zip.entryDataSync(zip.entry('chrome/juggler/content/protocol/Protocol.js'));
 
   const ctx = vm.createContext();
   const protocolJSCode = data.toString('utf8');
   function inject() {
     this.ChromeUtils = {
-      import: () => ({t})
-    }
+      import: () => ({ t })
+    };
     const t = {};
-    t.String = {"$type": "string"};
-    t.Number = {"$type": "number"};
-    t.Boolean = {"$type": "boolean"};
-    t.Undefined = {"$type": "undefined"};
-    t.Any = {"$type": "any"};
+    t.String = { '$type': 'string' };
+    t.Number = { '$type': 'number' };
+    t.Boolean = { '$type': 'boolean' };
+    t.Undefined = { '$type': 'undefined' };
+    t.Any = { '$type': 'any' };
 
     t.Enum = function(values) {
-      return {"$type": "enum", "$values": values};
-    }
+      return { '$type': 'enum', '$values': values };
+    };
 
     t.Nullable = function(scheme) {
-      return {...scheme, "$nullable": true};
-    }
+      return { ...scheme, '$nullable': true };
+    };
 
     t.Optional = function(scheme) {
-      return {...scheme, "$optional": true};
-    }
+      return { ...scheme, '$optional': true };
+    };
 
     t.Array = function(scheme) {
-      return {"$type": "array", "$items": scheme};
-    }
+      return { '$type': 'array', '$items': scheme };
+    };
 
     t.Recursive = function(types, schemeName) {
-      return {"$type": "ref", "$ref": schemeName };
-    }
+      return { '$type': 'ref', '$ref': schemeName };
+    };
   }
   const json = vm.runInContext(`(${inject})();${protocolJSCode}; this.protocol;`, ctx);
   await fs.promises.writeFile(outputPath, firefoxJSONToTS(json));
@@ -191,11 +208,11 @@ ${domains.map(([domainName, domain]) => `
   export interface CommandReturnValues {${domains.map(([domainName, domain]) => Object.keys(domain.methods).map(commandName => `
     "${domainName}.${commandName}": ${domainName}.${commandName}ReturnValue;`).join('')).join('')}
   }
-}`
+}`;
 
 }
 
-function firefoxTypeToString(type, indent='    ') {
+function firefoxTypeToString(type, indent = '    ') {
   if (!type)
     return 'void';
   if (!type['$type']) {
@@ -204,7 +221,7 @@ function firefoxTypeToString(type, indent='    ') {
     lines.push('{');
     for (const [propertyName, property] of properties) {
       const nameSuffix = property['$optional'] ? '?' : '';
-      const valueSuffix = property['$nullable'] ? '|null' : ''
+      const valueSuffix = property['$nullable'] ? '|null' : '';
       lines.push(`${indent}  ${propertyName}${nameSuffix}: ${firefoxTypeToString(property, indent + '  ')}${valueSuffix};`);
     }
     lines.push(`${indent}}`);

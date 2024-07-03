@@ -80,8 +80,8 @@ const iconNames = [
       return { tagName, attrs, children };
     }
     // each icon will generate a <clipPath> element with an id
-    return extract({ attrs: { ...attrs, id: `icon-${iconName}` }, children, '#name': 'clipPath' });
-  }))
+    return extract({ 'attrs': { ...attrs, id: `icon-${iconName}` }, children, '#name': 'clipPath' });
+  }));
   const svgJson = {
     tagName: 'svg', children: [{
       tagName: 'defs', children: [

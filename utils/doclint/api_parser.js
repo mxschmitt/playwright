@@ -32,7 +32,7 @@ class ApiParser {
    * @param {string=} paramsPath
    */
   constructor(apiDir, paramsPath) {
-    let bodyParts = [];
+    const bodyParts = [];
     for (const name of fs.readdirSync(apiDir)) {
       if (!name.endsWith('.md'))
         continue;
@@ -416,7 +416,7 @@ function extractSince(spec) {
  * @param {MarkdownHeaderNode} spec
  * @returns {boolean}
  */
- function extractHidden(spec) {
+function extractHidden(spec) {
   for (const child of spec.children) {
     if (child.type === 'li' && child.liType === 'bullet' && child.text === 'hidden')
       return true;
@@ -429,7 +429,7 @@ function extractSince(spec) {
  * @param {string} name
  * @returns {string | undefined}
  */
- function extractAttribute(spec, name) {
+function extractAttribute(spec, name) {
   for (const child of spec.children) {
     if (child.type !== 'li' || child.liType !== 'bullet' || !child.text.startsWith(name + ':'))
       continue;
@@ -457,11 +457,11 @@ function isTypeOverride(existingMember, member) {
   if (!existingMember.langs.only || !member.langs.only)
     return true;
   const existingOnly = existingMember.langs.only;
-  if (member.langs.only.every(l => existingOnly.includes(l))) {
+  if (member.langs.only.every(l => existingOnly.includes(l)))
     return true;
-  } else if (member.langs.only.some(l => existingOnly.includes(l))) {
+  else if (member.langs.only.some(l => existingOnly.includes(l)))
     throw new Error(`Ambiguous language override for: ${member.name}`);
-  }
+
   return false;
 }
 

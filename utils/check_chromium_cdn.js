@@ -186,7 +186,7 @@ function padCenter(text, length) {
 
 async function headRequest(url) {
   return new Promise(resolve => {
-    let options = URL.parse(url);
+    const options = URL.parse(url);
     options.method = 'HEAD';
     const request = https.request(options, res => resolve(res.statusCode === 200));
     request.on('error', error => resolve(false));

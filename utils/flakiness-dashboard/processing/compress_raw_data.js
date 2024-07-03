@@ -18,8 +18,8 @@
 
 const path = require('path');
 const fs = require('fs');
-const {SimpleBlob} = require('./utils.js');
-const {processDashboardCompressedV1} = require('./dashboard_compressed_v1.js');
+const { SimpleBlob } = require('./utils.js');
+const { processDashboardCompressedV1 } = require('./dashboard_compressed_v1.js');
 
 (async () => {
   const sha = process.argv[2];
@@ -30,5 +30,5 @@ const {processDashboardCompressedV1} = require('./dashboard_compressed_v1.js');
     console.error('ERROR: no data found for commit ' + sha);
     process.exit(1);
   }
-  await processDashboardCompressedV1({log: console.log}, reports, sha);
+  await processDashboardCompressedV1({ log: console.log }, reports, sha);
 })();

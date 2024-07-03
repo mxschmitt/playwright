@@ -30,12 +30,12 @@ module.exports = {
   create(context) {
     const parserServices = ESLintUtils.getParserServices(context);
     return {
-      'ClassDeclaration MethodDefinition ReturnStatement': function (statement) {
+      'ClassDeclaration MethodDefinition ReturnStatement': function(statement) {
         if (statement.type === 'ReturnStatement' && statement.argument) {
           if (tsutils.isThenableType(
-            parserServices.program.getTypeChecker(),
-            statement.argument,
-            parserServices.getTypeAtLocation(statement.argument)
+              parserServices.program.getTypeChecker(),
+              statement.argument,
+              parserServices.getTypeAtLocation(statement.argument)
           )) {
             context.report({
               node: statement,

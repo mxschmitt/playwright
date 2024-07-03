@@ -17,7 +17,7 @@
 /** @typedef {'Types'|'ReleaseNotesMd'} OutputType */
 
 // @ts-check
-const toKebabCase = require('lodash/kebabCase.js')
+const toKebabCase = require('lodash/kebabCase.js');
 const Documentation = require('./documentation');
 
 function createMarkdownLink(languagePath, member, text) {
@@ -29,7 +29,7 @@ function createMarkdownLink(languagePath, member, text) {
   else if (member.kind === 'event')
     hash = `${className}-event-${memberName}`.toLowerCase();
   return `[${text}](https://playwright.dev${languagePath}/docs/api/class-${member.clazz.name.toLowerCase()}#${hash})`;
-};
+}
 
 /**
  * @param {string} languagePath
@@ -38,10 +38,10 @@ function createMarkdownLink(languagePath, member, text) {
  */
 function createClassMarkdownLink(languagePath, clazz) {
   return `[${clazz.name}](https://playwright.dev${languagePath}/docs/api/class-${clazz.name.toLowerCase()})`;
-};
+}
 
 /**
- * @param {string} language 
+ * @param {string} language
  * @param {OutputType} outputType
  * @returns {Documentation.Renderer}
  */
@@ -71,7 +71,7 @@ function docsLinkRendererForLanguage(language, outputType) {
     if (member.kind === 'property')
       return createMarkdownLink(languagePath, member, `${className}${member.alias}`);
     throw new Error('Unknown member kind ' + member.kind);
-  }
+  };
 }
 
 function languageToRelativeDocsPath(language) {
@@ -89,7 +89,7 @@ function languageToRelativeDocsPath(language) {
 function formatClassName(className, language) {
   if (!className.endsWith('Assertions.'))
     return className;
-  className = className.substring(0, className.length - 1)
+  className = className.substring(0, className.length - 1);
   if (language === 'js')
     return `expect(${assertionArgument(className)}).`;
   else if (language === 'csharp')
@@ -155,4 +155,4 @@ module.exports = {
   docsLinkRendererForLanguage,
   renderPlaywrightDevLinks,
   languageToRelativeDocsPath,
-}
+};

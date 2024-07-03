@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {SimpleBlob} = require('./utils.js');
+const { SimpleBlob } = require('./utils.js');
 
 async function processDashboardRaw(context, report) {
   const timestamp = Date.now();
@@ -36,5 +36,5 @@ async function processDashboardRaw(context, report) {
   };
 }
 
-module.exports = {processDashboardRaw};
+module.exports = { processDashboardRaw };
 

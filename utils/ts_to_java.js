@@ -23,9 +23,11 @@ const util = require('util');
 const { argv } = require('process');
 
 (async () => {
-  if (process.argv.length < 3) throw new Error("Usage: node to_java.js <test>.spec.js");
+  if (process.argv.length < 3)
+    throw new Error('Usage: node to_java.js <test>.spec.js');
   const file = argv[2];
-  if (!file.endsWith('.spec.ts')) throw new Error("Unexpected input: " + file);
+  if (!file.endsWith('.spec.ts'))
+    throw new Error('Unexpected input: ' + file);
   console.log('Reading: ' + file);
   let content = await util.promisify(fs.readFile)(file);
   content = content.toString();
@@ -155,9 +157,9 @@ void ${name}() {`;
   content = content.replace(/\.catch\(e => e\)[;,]/g, ';\nfail("did not throw");\n} catch (PlaywrightException e) {}\n');
   content = content.replace(/(.+)\.catch\(e => error = e\);/g, '  try {\n  $1;\n    fail("did not throw");\n  } catch (PlaywrightException e) {\n  }\n');
 
-  const output = file.replace(/\.spec\.ts$/, ".java")
+  const output = file.replace(/\.spec\.ts$/, '.java');
   console.log('Writing: ' + output);
-  await util.promisify(fs.writeFile)(output, content)
+  await util.promisify(fs.writeFile)(output, content);
 })();
 
 function toTitleCase(s) {

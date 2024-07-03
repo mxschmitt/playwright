@@ -37,12 +37,12 @@ async function parseOverrides(filePath, commentForClass, commentForMethod, extra
   visit(file);
 
   let src = file.text;
-  for (const replacer of replacers.sort((a, b) => b.pos - a.pos)) {
+  for (const replacer of replacers.sort((a, b) => b.pos - a.pos))
     src = src.substring(0, replacer.pos) + replacer.text + src.substring(replacer.pos);
-  }
+
   return src;
 
-    /**
+  /**
    * @param {!ts.Node} node
    */
   function visit(node) {
@@ -124,4 +124,4 @@ async function parseOverrides(filePath, commentForClass, commentForMethod, extra
 
 }
 
-module.exports = {parseOverrides};
+module.exports = { parseOverrides };

@@ -24,13 +24,13 @@ const packageJSON = require('../../package.json');
 const baseVersion = packageJSON.version.split('-')[0];
 
 let prefix = '';
-if (process.argv[2] === '--alpha') {
+if (process.argv[2] === '--alpha')
   prefix = 'alpha';
-} else if (process.argv[2] === '--beta') {
+else if (process.argv[2] === '--beta')
   prefix = 'beta';
-} else {
+else
   throw new Error('only --alpha or --beta prefixes are allowed');
-}
+
 
 let newVersion;
 if (process.argv[3] === '--today-date') {

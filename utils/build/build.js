@@ -78,7 +78,7 @@ function filePath(relative) {
  * @returns {string}
  */
 function quotePath(path) {
-  return "\"" + path + "\"";
+  return '"' + path + '"';
 }
 
 /**

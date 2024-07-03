@@ -17,15 +17,15 @@
 
 // @ts-check
 
-const debug = require('debug')
+const debug = require('debug');
 const fs = require('fs');
 const path = require('path');
 const { parseApi } = require('../api_parser');
 const md = require('../../markdown');
-const { ESLint } = require('eslint')
+const { ESLint } = require('eslint');
 const child_process = require('child_process');
 const os = require('os');
-const actions = require('@actions/core')
+const actions = require('@actions/core');
 const { codeFrameColumns } = require('@babel/code-frame');
 
 /** @typedef {import('../documentation').Type} Type */
@@ -46,13 +46,13 @@ function getAllMarkdownFiles(dirPath, filePaths = []) {
 const run = async () => {
   const documentationRoot = path.join(PROJECT_DIR, 'docs', 'src');
   const lintingServiceFactory = new LintingServiceFactory();
-  let documentation = parseApi(path.join(documentationRoot, 'api'));
+  const documentation = parseApi(path.join(documentationRoot, 'api'));
 
   /** @type {CodeSnippet[]} */
   const codeSnippets = [];
   for (const filePath of getAllMarkdownFiles(documentationRoot)) {
     const data = fs.readFileSync(filePath, 'utf-8');
-    let rootNode = md.parse(data);
+    const rootNode = md.parse(data);
     // Renders links.
     documentation.renderLinksInNodes(rootNode);
     documentation.generateSourceCodeComments();
@@ -65,14 +65,14 @@ const run = async () => {
         filePath,
         codeLang,
         code,
-      })
+      });
     });
   }
   await lintingServiceFactory.lintAndReport(codeSnippets);
   const { hasErrors } = lintingServiceFactory.reportMetrics();
   if (hasErrors)
     process.exit(1);
-}
+};
 
 
 /** @typedef {{ codeLang: string, code: string, filePath: string }} CodeSnippet */
@@ -94,9 +94,9 @@ class LintingService {
   }
 
   /**
-   * @param {string} command 
+   * @param {string} command
    * @param {string[]} args
-   * @param {CodeSnippet[]} snippets 
+   * @param {CodeSnippet[]} snippets
    * @param {string} cwd
    * @returns {Promise<LintResult[]>}
    */
@@ -118,7 +118,7 @@ class LintingService {
   }
 
   /**
-   * @param {CodeSnippet[]} snippets 
+   * @param {CodeSnippet[]} snippets
    * @returns {Promise<LintResult[]>}
    */
   async lint(snippets) {
@@ -193,7 +193,7 @@ class PythonLintingService extends LintingService {
   }
 
   async lint(snippets) {
-    const result = await this.spawnAsync('python', [path.join(__dirname, 'python', 'main.py')], snippets, path.join(__dirname, 'python'))
+    const result = await this.spawnAsync('python', [path.join(__dirname, 'python', 'main.py')], snippets, path.join(__dirname, 'python'));
     return result;
   }
 }
@@ -204,7 +204,7 @@ class CSharpLintingService extends LintingService {
   }
 
   async lint(snippets) {
-    return await this.spawnAsync('dotnet', ['run', '--project', path.join(__dirname, 'csharp')], snippets, path.join(__dirname, 'csharp'))
+    return await this.spawnAsync('dotnet', ['run', '--project', path.join(__dirname, 'csharp')], snippets, path.join(__dirname, 'csharp'));
   }
 }
 
@@ -213,11 +213,11 @@ class LintingServiceFactory {
     /** @type {LintingService[]} */
     this.services = [
       new JSLintingService(),
-    ]
+    ];
     if (!process.env.NO_EXTERNAL_DEPS) {
       this.services.push(
-        new PythonLintingService(),
-        new CSharpLintingService(),
+          new PythonLintingService(),
+          new CSharpLintingService(),
       );
     }
     this._metrics = {};
@@ -257,11 +257,12 @@ class LintingServiceFactory {
           console.log(`File: ${filePath}`);
           console.log(code);
           console.log('-'.repeat(80));
-          if (process.env.GITHUB_ACTION)
+          if (process.env.GITHUB_ACTION) {
             actions.warning(`Error: ${error}\nUnable to lint:\n${code}`, {
               title: `${codeLang} linting error`,
               file: filePath,
             });
+          }
         }
       }
     }
@@ -276,22 +277,22 @@ class LintingServiceFactory {
       if (!metric[name])
         return '';
       return `${name}: ${metric[name]}`;
-    }
+    };
     let hasErrors = false;
     const languagesOrderedByOk = Object.entries(this._metrics).sort(([langA], [langB]) => {
-      return this._metrics[langB].ok - this._metrics[langA].ok
-    })
+      return this._metrics[langB].ok - this._metrics[langA].ok;
+    });
     for (const [language, metrics] of languagesOrderedByOk) {
       if (metrics.error)
         hasErrors = true;
-      console.log(`  ${language}: ${['ok', 'updated', 'error', 'unsupported'].map(name => renderMetric(metrics, name)).filter(Boolean).join(', ')}`)
+      console.log(`  ${language}: ${['ok', 'updated', 'error', 'unsupported'].map(name => renderMetric(metrics, name)).filter(Boolean).join(', ')}`);
     }
-    return { hasErrors }
+    return { hasErrors };
   }
 
   /**
-   * @param {string} language 
-   * @param {LintResult} result 
+   * @param {string} language
+   * @param {LintResult} result
    */
   _collectMetrics(language, result) {
     if (!this._metrics[language])

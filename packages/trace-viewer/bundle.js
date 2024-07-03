@@ -32,5 +32,5 @@ export function bundle() {
         return html.replace(/(?=<!--)([\s\S]*?)-->/, '').replace('<!-- <script src="stall.js"></script> -->', '<script src="stall.js"></script>');
       },
     },
-  }
+  };
 }

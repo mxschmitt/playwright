@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {SimpleBlob, flattenSpecs} = require('./utils.js');
+const { SimpleBlob, flattenSpecs } = require('./utils.js');
 
 async function processDashboardCompressedV1(context, reports, commitSHA) {
   const timestamp = Date.now();
@@ -28,7 +28,7 @@ async function processDashboardCompressedV1(context, reports, commitSHA) {
   `);
 }
 
-module.exports = {processDashboardCompressedV1, compressReports};
+module.exports = { processDashboardCompressedV1, compressReports };
 
 function compressReports(reports) {
   const files = {};

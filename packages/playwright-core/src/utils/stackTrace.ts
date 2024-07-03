@@ -16,7 +16,6 @@
 
 import path from 'path';
 import { parseStackTraceLine } from '../utilsBundle';
-import { isUnderTest } from './';
 import type { StackFrame } from '@protocol/channels';
 import { colors } from '../utilsBundle';
 
@@ -50,7 +49,6 @@ export function captureRawStack(): RawStack {
 export function captureLibraryStackTrace(): { frames: StackFrame[], apiName: string } {
   const stack = captureRawStack();
 
-  const isTesting = isUnderTest();
   type ParsedFrame = {
     frame: StackFrame;
     frameText: string;

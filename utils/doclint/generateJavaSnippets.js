@@ -1,7 +1,22 @@
+/**
+ * Copyright (c) Microsoft Corporation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 // @ts-check
 
-const fs = require("fs");
-const md = require("../markdown");
+const fs = require('fs');
+const md = require('../markdown');
 
 
 /**
@@ -11,13 +26,13 @@ function transformValue(input) {
   const out = [];
   const suffix = [];
   for (let line of input) {
-    let match = line.match(/const { (\w+) } = require\('playwright'\);/);
+    const match = line.match(/const { (\w+) } = require\('playwright'\);/);
     if (match) {
       out.push('import com.microsoft.playwright.*;');
       out.push('');
       out.push('public class Example {');
       out.push('  public static void main(String[] args) {');
-      out.push('    try (Playwright playwright = Playwright.create()) {');      
+      out.push('    try (Playwright playwright = Playwright.create()) {');
       out.push(`      BrowserType ${match[1]} = playwright.${match[1]}();`);
       suffix.push('    }');
       suffix.push('  }');
@@ -30,12 +45,12 @@ function transformValue(input) {
       continue;
     if (line.trim() === '}')
       continue;
-  
+
     // Remove await/Promise.all
     line = line.replace(/const \[(.+)\] = await Promise.all\(\[/g, '$1 =');
     line = line.replace(/Promise\.all\(\[/g, '');
     line = line.replace(/await /g, '');
-  
+
     // Rename some methods
     line = line.replace(/\.goto\(/g, '.navigate(');
     line = line.replace(/\.continue\(/g, '.resume(');
@@ -57,7 +72,7 @@ function transformValue(input) {
     line = line.replace(/\.webkit\./g, '.webkit().');
     line = line.replace(/\.firefox\./g, '.firefox().');
     line = line.replace(/\.length/g, '.size()');
-  
+
     // JUnit asserts
     line = line.replace(/expect\((.+)\).toBeTruthy\(\);/g, 'assertNotNull($1);');
     line = line.replace(/expect\(error.message\)\.toContain\((.+)\);/g, 'assertTrue(e.getMessage().contains($1));');
@@ -71,7 +86,7 @@ function transformValue(input) {
 
     line = line.replace(/\[('[^']+')\]/g, '.get("$1")');
     line = line.replace(/.push\(/g, '.add(');
-  
+
     // Define common types
     line = line.replace(/const browser = /g, 'Browser browser = ');
     line = line.replace(/const context = /g, 'BrowserContext context = ');
@@ -98,9 +113,9 @@ function transformValue(input) {
 
     line = line.replace(/[`']/g, '"');
 
-    out.push(line)
+    out.push(line);
   }
-  return [...out, ...suffix].join("\n");
+  return [...out, ...suffix].join('\n');
 }
 
 /**
@@ -114,9 +129,9 @@ function toTitleCase(name) {
  * @param {md.MarkdownNode} node
  */
 function generateComment(node) {
-  const commentNode = md.clone(node)
+  const commentNode = md.clone(node);
   commentNode.codeLang = 'java';
-  commentNode.lines = ['// FIXME', ...transformValue(node.lines).split("\n")];
+  commentNode.lines = ['// FIXME', ...transformValue(node.lines).split('\n')];
   return commentNode;
 }
 
@@ -125,9 +140,9 @@ function generateComment(node) {
  * @param {md.MarkdownNode[]} spec
  */
 function multiplyComment(spec) {
-  const children = []
+  const children = [];
   for (const node of (spec || [])) {
-    if (node.codeLang === "js")
+    if (node.codeLang === 'js')
       children.push(node, generateComment(node));
     else
       children.push(node);
@@ -135,20 +150,20 @@ function multiplyComment(spec) {
   return children;
 }
 
-for (const name of fs.readdirSync("docs/src")) {
-  if (!name.endsWith(".md"))
+for (const name of fs.readdirSync('docs/src')) {
+  if (!name.endsWith('.md'))
     continue;
   if (name.includes('android'))
     continue;
   const inputFile = `docs/src/${name}`;
   const fileline = fs.readFileSync(inputFile).toString();
   const nodes = md.parse(fileline);
-  
+
   md.visitAll(nodes, node => {
     if (node.children)
       node.children = multiplyComment(node.children);
   });
-  
+
   const out = md.render(nodes, 120);
   fs.writeFileSync(inputFile, out);
 }

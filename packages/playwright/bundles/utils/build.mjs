@@ -15,13 +15,13 @@
  */
 
 // @ts-check
-const path = require('path');
-const fs = require('fs');
-const esbuild = require('esbuild');
+import path from 'path';
+import fs from 'fs';
+import esbuild from 'esbuild';
 
 // Can be removed once source-map-support was is fixed.
 /** @type{import('esbuild').Plugin} */
-let patchSource = {
+const patchSource = {
   name: 'patch-source-map-support-deprecation',
   setup(build) {
     build.onResolve({ filter: /^source-map-support$/ }, () => {
@@ -33,29 +33,24 @@ let patchSource = {
       const insertedLine = `if (state.nextPosition.name === 'func') return originalFunctionName() || 'func';`;
       sourceFileContent = sourceFileContent.replace(original, insertedLine + original);
       fs.writeFileSync(patchedPath, sourceFileContent);
-      return { path: patchedPath }
+      return { path: patchedPath };
     });
   },
 };
 
-(async () => {
-  const ctx = await esbuild.context({
-    entryPoints: [path.join(__dirname, 'src/utilsBundleImpl.ts')],
-    external: ['fsevents'],
-    bundle: true,
-    outdir: path.join(__dirname, '../../lib'),
-    plugins: [patchSource],
-    format: 'cjs',
-    platform: 'node',
-    target: 'ES2019',
-    sourcemap: process.argv.includes('--sourcemap'),
-    minify: process.argv.includes('--minify'),
-  });
-  await ctx.rebuild();
-  if (process.argv.includes('--watch'))
-    await ctx.watch();
-  await ctx.dispose();
-})().catch(error => {
-  console.error(error);
-  process.exit(1);
+const ctx = await esbuild.context({
+  entryPoints: [path.join(import.meta.dirname, 'src/utilsBundleImpl.ts')],
+  external: ['fsevents'],
+  bundle: true,
+  outdir: path.join(import.meta.dirname, '../../lib'),
+  plugins: [patchSource],
+  format: 'cjs',
+  platform: 'node',
+  target: 'ES2019',
+  sourcemap: process.argv.includes('--sourcemap'),
+  minify: process.argv.includes('--minify'),
 });
+await ctx.rebuild();
+if (process.argv.includes('--watch'))
+  await ctx.watch();
+await ctx.dispose();

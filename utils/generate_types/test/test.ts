@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Copyright (c) Microsoft Corporation.
  *
@@ -88,7 +89,7 @@ playwright.chromium.launch().then(async browser => {
 
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 
 playwright.chromium.launch().then(async browser => {
   const page = await browser.newPage();
@@ -111,8 +112,10 @@ playwright.chromium.launch().then(async browser => {
   await page.exposeFunction('readfile', async (filePath: string) => {
     return new Promise((resolve, reject) => {
       fs.readFile(filePath, 'utf8', (err, text) => {
-        if (err) reject(err);
-        else resolve(text);
+        if (err)
+          reject(err);
+        else
+          resolve(text);
       });
     });
   });
@@ -127,7 +130,7 @@ playwright.chromium.launch().then(async browser => {
     await source.page.goto('http://example.com');
   }, { handle: true });
 
-  await page.emulateMedia({media: 'screen'});
+  await page.emulateMedia({ media: 'screen' });
   await page.pdf({ path: 'page.pdf' });
 
   await page.route('**/*', (route, interceptedRequest) => {
@@ -136,7 +139,8 @@ playwright.chromium.launch().then(async browser => {
       interceptedRequest.url().endsWith('.jpg')
     )
       route.abort();
-    else route.continue();
+    else
+      route.continue();
   });
 
   await page.route('**/*', route => route.continue());
@@ -144,7 +148,7 @@ playwright.chromium.launch().then(async browser => {
   await page.route(str => {
     return true;
   }, (route, request) => {
-    const {referer} = request.headers();
+    const { referer } = request.headers();
     const isString: AssertType<string, typeof referer> = true;
     route.continue({
       headers: {
@@ -188,7 +192,7 @@ playwright.chromium.launch().then(async browser => {
   page.keyboard.up('Shift');
   page.keyboard.press('Backspace');
   page.keyboard.insertText('嗨');
-  await browser.startTracing(page, { path: 'trace.json'});
+  await browser.startTracing(page, { path: 'trace.json' });
   await page.goto('https://www.google.com');
   await browser.stopTracing();
 
@@ -205,7 +209,7 @@ playwright.chromium.launch().then(async browser => {
     name: 'yo',
     mimeType: 'text/plain',
     buffer: Buffer.from('yo')
-  }])
+  }]);
 });
 
 // Example with launch options
@@ -273,7 +277,8 @@ playwright.chromium.launch().then(async browser => {
 
   page.on('console', (event: playwright.ConsoleMessage, ...args: any[]) => {
     console.log(event.text, event.type);
-    for (let i = 0; i < args.length; ++i) console.log(`${i}: ${args[i]}`);
+    for (let i = 0; i < args.length; ++i)
+      console.log(`${i}: ${args[i]}`);
   });
 
   await button.focus();
@@ -296,7 +301,7 @@ playwright.chromium.launch().then(async browser => {
   const expiresIsNumber: AssertType<number, typeof cookie.expires> = true;
   const httpOnlyIsBoolean: AssertType<boolean, typeof cookie.httpOnly> = true;
   const secureIsBoolean: AssertType<boolean, typeof cookie.secure> = true;
-  const sameSiteIsEnum: AssertType<"Strict"|"Lax"|"None", typeof cookie.sameSite> = true;
+  const sameSiteIsEnum: AssertType<'Strict'|'Lax'|'None', typeof cookie.sameSite> = true;
 
   const navResponse = await page.waitForNavigation({
     timeout: 1000
@@ -413,7 +418,7 @@ playwright.chromium.launch().then(async browser => {
   const page = await browser.newPage();
   const locator = page.locator('.foo');
   {
-    const result = await locator.evaluate((sel: HTMLSelectElement) => sel.options[sel.selectedIndex].textContent)
+    const result = await locator.evaluate((sel: HTMLSelectElement) => sel.options[sel.selectedIndex].textContent);
     const assertion: AssertType<string, typeof result> = true;
   }
   {
@@ -421,7 +426,7 @@ playwright.chromium.launch().then(async browser => {
     const assertion: AssertType<number, typeof result> = true;
   }
   {
-    await locator.evaluate((input: HTMLInputElement) => {})
+    await locator.evaluate((input: HTMLInputElement) => {});
   }
   {
     const list = await locator.evaluateAll((i: HTMLInputElement[]) => i.length);
@@ -432,7 +437,7 @@ playwright.chromium.launch().then(async browser => {
     const assertion: AssertType<number, typeof list> = true;
   }
   {
-    await locator.evaluateAll((sel: HTMLSelectElement[]) => {})
+    await locator.evaluateAll((sel: HTMLSelectElement[]) => {});
   }
   await browser.close();
 })();
@@ -485,7 +490,7 @@ playwright.chromium.launch().then(async browser => {
     const assertion: AssertType<string, typeof value> = true;
   }
   {
-    const value = await page.workers()[0].evaluate(() => [1,2,3]);
+    const value = await page.workers()[0].evaluate(() => [1, 2, 3]);
     const assertion: AssertType<number[], typeof value> = true;
   }
   {
@@ -493,61 +498,61 @@ playwright.chromium.launch().then(async browser => {
     const assertion: AssertType<string, typeof value> = true;
   }
   {
-    const value = await page.evaluate(({a, b}) => b ? a : '123', { a: 3, b: true });
+    const value = await page.evaluate(({ a, b }) => b ? a : '123', { a: 3, b: true });
     const assertion: AssertType<number | string, typeof value> = true;
   }
   {
-    const value = await page.evaluate(([a, b, c]) => ({a, b, c}), [3, '123', true]);
+    const value = await page.evaluate(([a, b, c]) => ({ a, b, c }), [3, '123', true]);
     const assertion: AssertType<{a: string | number | boolean, b: string | number | boolean, c: string | number | boolean}, typeof value> = true;
   }
   {
-    const value = await page.evaluate(([a, b, c]) => ({a, b, c}), [3, '123', true] as const);
+    const value = await page.evaluate(([a, b, c]) => ({ a, b, c }), [3, '123', true] as const);
     const assertion: AssertType<{a: 3, b: '123', c: true}, typeof value> = true;
   }
   {
     const handle = await page.evaluateHandle(() => 3);
-    const value = await page.evaluate(([a, b, c, d]) => ({a, b, c, d}), wrap(handle));
+    const value = await page.evaluate(([a, b, c, d]) => ({ a, b, c, d }), wrap(handle));
     const assertion: AssertType<{a: number, b: string, c: boolean, d: number}, typeof value> = true;
   }
   {
     const handle = await page.evaluateHandle(() => 3);
-    const h = await page.evaluateHandle(([a, b, c, d]) => ({a, b, c, d}), wrap(handle));
+    const h = await page.evaluateHandle(([a, b, c, d]) => ({ a, b, c, d }), wrap(handle));
     const value = await h.evaluate(h => h);
     const assertion: AssertType<{a: number, b: string, c: boolean, d: number}, typeof value> = true;
   }
 
   {
-    const handle = await page.locator('body').evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.locator('body').evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluate(h => h[1].a);
     const assertion: AssertType<string, typeof value> = true;
   }
   {
-    const handle = await page.locator('body').evaluateHandle(() => ([{a: '123'}]));
-    const value = await handle.evaluate((h, p) => ({ a: h[1].a, p}), 123);
+    const handle = await page.locator('body').evaluateHandle(() => ([{ a: '123' }]));
+    const value = await handle.evaluate((h, p) => ({ a: h[1].a, p }), 123);
     const assertion: AssertType<{a: string, p: number}, typeof value> = true;
   }
   {
-    const handle = await page.locator('body').evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.locator('body').evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluate((h: ({a: string, b: number})[]) => h[1].b);
     const assertion: AssertType<number, typeof value> = true;
   }
   {
-    const handle = await page.locator('body').evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.locator('body').evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluate((h: ({a: string, b: number})[], prop) => h[1][prop], 'b' as const);
     const assertion: AssertType<number, typeof value> = true;
   }
   {
-    const handle = await page.locator('body').evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.locator('body').evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluateHandle(h => h[1].a);
     const assertion: AssertType<playwright.JSHandle<string>, typeof value> = true;
   }
   {
-    const handle = await page.locator('body').evaluateHandle(() => ([{a: '123'}]));
-    const value = await handle.evaluateHandle((h, p) => ({ a: h[1].a, p}), 123);
+    const handle = await page.locator('body').evaluateHandle(() => ([{ a: '123' }]));
+    const value = await handle.evaluateHandle((h, p) => ({ a: h[1].a, p }), 123);
     const assertion: AssertType<playwright.JSHandle<{a: string, p: number}>, typeof value> = true;
   }
   {
-    const handle = await page.locator('body').evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.locator('body').evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluateHandle((h: ({a: string, b: number})[]) => h[1].b);
     const assertion: AssertType<playwright.JSHandle<number>, typeof value> = true;
   }
@@ -561,47 +566,47 @@ playwright.chromium.launch().then(async browser => {
     const assertion: AssertType<string, typeof value> = true;
   }{
     const handle = await page.locator('body').evaluateHandle(() => 3);
-    const value = await page.evaluate(([a, b, c, d]) => ({a, b, c, d}), wrap(handle));
+    const value = await page.evaluate(([a, b, c, d]) => ({ a, b, c, d }), wrap(handle));
     const assertion: AssertType<{a: number, b: string, c: boolean, d: number}, typeof value> = true;
   }
   {
     const handle = await page.locator('body').evaluateHandle(() => 3);
-    const h = await page.locator('body').evaluateHandle((_, [a, b, c, d]) => ({a, b, c, d}), wrap(handle));
+    const h = await page.locator('body').evaluateHandle((_, [a, b, c, d]) => ({ a, b, c, d }), wrap(handle));
     const value = await h.evaluate(h => h);
     const assertion: AssertType<{a: number, b: string, c: boolean, d: number}, typeof value> = true;
   }
   {
-    const handle = await page.evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluate(h => h[1].a);
     const assertion: AssertType<string, typeof value> = true;
   }
   {
-    const handle = await page.evaluateHandle(() => ([{a: '123'}]));
-    const value = await handle.evaluate((h, p) => ({ a: h[1].a, p}), 123);
+    const handle = await page.evaluateHandle(() => ([{ a: '123' }]));
+    const value = await handle.evaluate((h, p) => ({ a: h[1].a, p }), 123);
     const assertion: AssertType<{a: string, p: number}, typeof value> = true;
   }
   {
-    const handle = await page.evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluate((h: ({a: string, b: number})[]) => h[1].b);
     const assertion: AssertType<number, typeof value> = true;
   }
   {
-    const handle = await page.evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluate((h: ({a: string, b: number})[], prop) => h[1][prop], 'b' as const);
     const assertion: AssertType<number, typeof value> = true;
   }
   {
-    const handle = await page.evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluateHandle(h => h[1].a);
     const assertion: AssertType<playwright.JSHandle<string>, typeof value> = true;
   }
   {
-    const handle = await page.evaluateHandle(() => ([{a: '123'}]));
-    const value = await handle.evaluateHandle((h, p) => ({ a: h[1].a, p}), 123);
+    const handle = await page.evaluateHandle(() => ([{ a: '123' }]));
+    const value = await handle.evaluateHandle((h, p) => ({ a: h[1].a, p }), 123);
     const assertion: AssertType<playwright.JSHandle<{a: string, p: number}>, typeof value> = true;
   }
   {
-    const handle = await page.evaluateHandle(() => ([{a: '123'}]));
+    const handle = await page.evaluateHandle(() => ([{ a: '123' }]));
     const value = await handle.evaluateHandle((h: ({a: string, b: number})[]) => h[1].b);
     const assertion: AssertType<playwright.JSHandle<number>, typeof value> = true;
   }
@@ -645,7 +650,7 @@ playwright.chromium.launch().then(async browser => {
     const handle = await page.evaluateHandle(() => document.body);
     const tuple = { s: '', n: 23, h: handle };
     const value = await page.evaluate(([{ s, n, h }]) => {
-      return parseInt(s) + n + parseInt(h.nodeName);
+      return parseInt(s, 10) + n + parseInt(h.nodeName, 10);
     }, [tuple]);
     const assertion: AssertType<number, typeof value> = true;
   }
@@ -668,8 +673,8 @@ playwright.chromium.launch().then(async browser => {
   }
 
   {
-    await page.addInitScript((args) => {
-      args.foo === args.hello.world
+    await page.addInitScript(args => {
+      const matches = args.foo === args.hello.world;
     }, {
       foo: 'bar',
       hello: {
@@ -735,7 +740,7 @@ playwright.chromium.launch().then(async browser => {
   await frame.$eval('my-custom-element', element => {
     const elementAssertion: AssertType<HTMLElement|SVGElement, typeof element> = true;
   });
-  await frame.$$eval('my-custom-element', (elements, {x, y}) => {
+  await frame.$$eval('my-custom-element', (elements, { x, y }) => {
     const elementAssertion: AssertType<(HTMLElement|SVGElement)[], typeof elements> = true;
     const numberAssertion: AssertType<number, typeof x> = true;
     const stringAssertion: AssertType<string, typeof y> = true;
@@ -746,7 +751,7 @@ playwright.chromium.launch().then(async browser => {
   }, 5);
 
   const something = Math.random()  > .5 ? 'visible' : 'attached';
-  const handle = await page.waitForSelector('a', {state: something});
+  const handle = await page.waitForSelector('a', { state: something });
   await handle.$eval('span', (element, { x, y }) => {
     const spanAssertion: AssertType<HTMLSpanElement, typeof element> = true;
     const numberAssertion: AssertType<number, typeof x> = true;
@@ -798,34 +803,34 @@ playwright.chromium.launch().then(async browser => {
     }
   }
 
-  type AssertCanBeNull<T> = null extends T ? true : false
+  type AssertCanBeNull<T> = null extends T ? true : false;
 
   const frameLikes = [page, frame];
   for (const frameLike of frameLikes) {
     {
       const handle = await frameLike.waitForSelector('body');
       const bodyAssertion: AssertType<playwright.ElementHandle<HTMLBodyElement>, typeof handle> = true;
-      const canBeNull: AssertCanBeNull<typeof handle> = false
+      const canBeNull: AssertCanBeNull<typeof handle> = false;
     }
     {
-      const handle = await frameLike.waitForSelector('body', {timeout: 0});
+      const handle = await frameLike.waitForSelector('body', { timeout: 0 });
       const bodyAssertion: AssertType<playwright.ElementHandle<HTMLBodyElement>, typeof handle> = true;
       const canBeNull: AssertCanBeNull<typeof handle> = false;
     }
     {
       const state = Math.random() > .5 ? 'attached' : 'visible';
-      const handle = await frameLike.waitForSelector('body', {state});
+      const handle = await frameLike.waitForSelector('body', { state });
       const bodyAssertion: AssertType<playwright.ElementHandle<HTMLBodyElement>, typeof handle> = true;
       const canBeNull: AssertCanBeNull<typeof handle> = false;
     }
     {
-      const handle = await frameLike.waitForSelector('body', {state: 'hidden'});
+      const handle = await frameLike.waitForSelector('body', { state: 'hidden' });
       const bodyAssertion: AssertType<playwright.ElementHandle<HTMLBodyElement>, typeof handle> = true;
       const canBeNull: AssertCanBeNull<typeof handle> = true;
     }
     {
       const state = Math.random() > .5 ? 'hidden' : 'visible';
-      const handle = await frameLike.waitForSelector('body', {state});
+      const handle = await frameLike.waitForSelector('body', { state });
       const bodyAssertion: AssertType<playwright.ElementHandle<HTMLBodyElement>, typeof handle> = true;
       const canBeNull: AssertCanBeNull<typeof handle> = true;
     }
@@ -835,19 +840,19 @@ playwright.chromium.launch().then(async browser => {
       const canBeNull: AssertCanBeNull<typeof handle> = false;
     }
     {
-      const handle = await frameLike.waitForSelector('something-strange', {timeout: 0});
+      const handle = await frameLike.waitForSelector('something-strange', { timeout: 0 });
       const elementAssertion: AssertType<playwright.ElementHandle<HTMLElement|SVGElement>, typeof handle> = true;
       const canBeNull: AssertCanBeNull<typeof handle> = false;
     }
     {
       const state = Math.random() > .5 ? 'attached' : 'visible';
-      const handle = await frameLike.waitForSelector('something-strange', {state});
+      const handle = await frameLike.waitForSelector('something-strange', { state });
       const elementAssertion: AssertType<playwright.ElementHandle<HTMLElement|SVGElement>, typeof handle> = true;
       const canBeNull: AssertCanBeNull<typeof handle> = false;
     }
     {
       const state = Math.random() > .5 ? 'hidden' : 'visible';
-      const handle = await frameLike.waitForSelector('something-strange', {state});
+      const handle = await frameLike.waitForSelector('something-strange', { state });
       const elementAssertion: AssertType<playwright.ElementHandle<HTMLElement|SVGElement>, typeof handle> = true;
       const canBeNull: AssertCanBeNull<typeof handle> = true;
     }
@@ -858,12 +863,16 @@ playwright.chromium.launch().then(async browser => {
 
 // top level
 (async () => {
-  playwright.chromium.connect;
-  playwright.errors.TimeoutError;
+  try {
+    await playwright.chromium.connect('http://localhost:1234');
+  } catch (error) {
+    if (error instanceof playwright.errors.TimeoutError)
+      console.log('make sure that the TimeoutError is exposed');
+  }
   {
     playwright.devices['my device'] = {
       userAgent: 'foo',
-      viewport: {height: 123, width: 456},
+      viewport: { height: 123, width: 456 },
       deviceScaleFactor: 1,
       hasTouch: false,
       isMobile: true,
@@ -899,31 +908,31 @@ playwright.chromium.launch().then(async browser => {
 })();
 
 // Event listeners
-(async function() {
+(async () => {
   {
     const eventEmitter = {} as (playwright.Page | EventEmitter);
     const listener = () => { };
     eventEmitter.addListener('close', listener)
-      .on('close', listener)
-      .once('close', listener)
-      .removeListener('close', listener)
-      .off('close', listener);
+        .on('close', listener)
+        .once('close', listener)
+        .removeListener('close', listener)
+        .off('close', listener);
 
   }
   {
     const eventEmitter = {} as (playwright.BrowserContext | EventEmitter);
     const listener = (c: playwright.BrowserContext) => { };
     eventEmitter.addListener('close', listener)
-      .on('close', listener)
-      .once('close', listener)
-      .removeListener('close', listener)
-      .off('close', listener);
+        .on('close', listener)
+        .once('close', listener)
+        .removeListener('close', listener)
+        .off('close', listener);
   }
   {
     const page: playwright.Page = {} as any;
     page.on('dialog', dialog => dialog.accept());
   }
-});
+})();
 
 // waitForResponse callback predicate
 (async () => {
@@ -944,7 +953,7 @@ playwright.chromium.launch().then(async browser => {
   const browserType = {} as playwright.BrowserType<playwright.Browser & {foo: 'string'}>;
   const browser = await browserType.launch();
   await browser.close();
-})
+})();
 
 // exported types
 import {

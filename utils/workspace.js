@@ -24,10 +24,10 @@ const fs = require('fs');
 const path = require('path');
 const child_process = require('child_process');
 
-const readJSON = async (filePath) => JSON.parse(await fs.promises.readFile(filePath, 'utf8'));
+const readJSON = async filePath => JSON.parse(await fs.promises.readFile(filePath, 'utf8'));
 const writeJSON = async (filePath, json) => {
   await fs.promises.writeFile(filePath, JSON.stringify(json, null, 2) + '\n');
-}
+};
 
 class PWPackage {
   constructor(descriptor) {
@@ -96,7 +96,7 @@ class Workspace {
 
     // Make sure package-lock version is consistent with root package.json version.
     packageLock.version = version;
-    packageLock.packages[""].version = version;
+    packageLock.packages[''].version = version;
 
     for (const pkg of this._packages) {
       // 1. Copy package files.
@@ -125,7 +125,7 @@ class Workspace {
       }
       await maybeWriteJSON(pkg.packageJSONPath, pkg.packageJSON);
     }
-  
+
     // Re-run npm i to make package-lock dirty.
     child_process.execSync('npm i');
     return hasChanges;
@@ -219,11 +219,11 @@ const workspace = new Workspace(ROOT_PATH, [
   }),
 ]);
 
-if (require.main === module) {
+if (require.main === module)
   parseCLI();
-} else {
-  module.exports = {workspace};
-}
+else
+  module.exports = { workspace };
+
 
 function die(message, exitCode = 1) {
   console.error(message);
@@ -247,10 +247,10 @@ async function parseCLI() {
           console.log(pkg.path);
       }
     },
-    '--get-version': async (version) => {
+    '--get-version': async version => {
       console.log(await workspace.version());
     },
-    '--set-version': async (version) => {
+    '--set-version': async version => {
       if (!version)
         die('ERROR: Please specify version! e.g. --set-version 1.99.2');
       await workspace.setVersion(version);

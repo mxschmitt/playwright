@@ -128,7 +128,7 @@ class TypesGenerator {
         throw new Error(`Unknown override method "${className}.${methodName}"`);
       }
       return this.memberJSDOC(method, '  ').trimLeft();
-    }, (className) => {
+    }, className => {
       const docClass = this.docClassForName(className);
       if (!docClass || !this.shouldGenerate(docClass.name))
         return '';
@@ -203,7 +203,7 @@ class TypesGenerator {
       const usedInternally = internalWords.has(name);
       if (!usedInternally && !shouldExport)
         continue;
-      parts.push(`${shouldExport ? 'export ' : ''}interface ${name} ${this.stringifyObjectType(properties, name, '')}\n`)
+      parts.push(`${shouldExport ? 'export ' : ''}interface ${name} ${this.stringifyObjectType(properties, name, '')}\n`);
     }
     return parts.join('\n');
   }
@@ -217,9 +217,9 @@ class TypesGenerator {
    */
   classToString(classDesc) {
     const parts = [];
-    if (classDesc.comment) {
-      parts.push(this.writeComment(classDesc.comment))
-    }
+    if (classDesc.comment)
+      parts.push(this.writeComment(classDesc.comment));
+
     const shouldExport = !this.doNotExportClassNames.has(classDesc.name);
     parts.push(`${shouldExport ? 'export ' : ''}interface ${classDesc.name} ${classDesc.extends ? `extends ${classDesc.extends} ` : ''}{`);
     parts.push(this.classBody(classDesc));
@@ -276,13 +276,13 @@ class TypesGenerator {
    * @param {boolean=} exportMembersAsGlobals
    */
   classBody(classDesc, exportMembersAsGlobals) {
-    let parts = [];
+    const parts = [];
     const eventDescriptions = this.createEventDescriptions(classDesc);
     const commentForMethod = {
       off: 'Removes an event listener added by `on` or `addListener`.',
       removeListener: 'Removes an event listener added by `on` or `addListener`.',
       once: 'Adds an event listener that will be automatically removed after it is triggered once. See `addListener` for more information about this event.'
-    }
+    };
     const indent = exportMembersAsGlobals ? '' : '  ';
     for (const method of ['on', 'once', 'addListener', 'removeListener', 'off', 'prependListener']) {
       for (const { eventName, params, comment } of eventDescriptions) {
@@ -320,9 +320,9 @@ class TypesGenerator {
         return '';
       if (exportMembersAsGlobals) {
         const memberType = member.kind === 'method' ? `${args} => ${type}` : type;
-        return `${jsdoc}${exportMembersAsGlobals ? 'export const ' : ''}${member.alias}: ${memberType};`
+        return `${jsdoc}${exportMembersAsGlobals ? 'export const ' : ''}${member.alias}: ${memberType};`;
       }
-      return `${jsdoc}${member.alias}${member.required ? '' : '?'}${args}: ${type};`
+      return `${jsdoc}${member.alias}${member.required ? '' : '?'}${args}: ${type};`;
     }).filter(x => x).join('\n\n'));
     return parts.join('\n') + '\n';
   }
@@ -354,9 +354,9 @@ class TypesGenerator {
   writeComment(comment, indent = '') {
     const parts = [];
     const out = [];
-    const pushLine = (line) => {
+    const pushLine = line => {
       if (line || out[out.length - 1])
-        out.push(line)
+        out.push(line);
     };
     let skipExample = false;
     for (let line of comment.split('\n')) {
@@ -368,7 +368,7 @@ class TypesGenerator {
           flavor = match[3];
           line = line.replace(/tab=js-\w+/, '').replace(/```\w+/, '```ts');
         }
-        skipExample = !["html", "yml", "bash", "js", "txt"].includes(lang) || flavor !== 'ts';
+        skipExample = !['html', 'yml', 'bash', 'js', 'txt'].includes(lang) || flavor !== 'ts';
       } else if (skipExample && line.trim().startsWith('```')) {
         skipExample = false;
         continue;
@@ -439,11 +439,11 @@ class TypesGenerator {
         throw new Error(`Object type must have properties`);
       if (!this.objectDefinitions.some(o => o.name === name))
         this.objectDefinitions.push({ name, properties });
-      if (shouldExport) {
+      if (shouldExport)
         out = name;
-      } else {
+      else
         out = this.stringifyObjectType(properties, name, indent);
-      }
+
     }
 
     if (type.args) {
@@ -499,7 +499,7 @@ class TypesGenerator {
   }
 }
 
-(async function () {
+(async function() {
   const coreDocumentation = parseApi(path.join(PROJECT_DIR, 'docs', 'src', 'api'));
   const testDocumentation = parseApi(path.join(PROJECT_DIR, 'docs', 'src', 'test-api'), path.join(PROJECT_DIR, 'docs', 'src', 'api', 'params.md'));
   const reporterDocumentation = parseApi(path.join(PROJECT_DIR, 'docs', 'src', 'test-reporter-api'));
@@ -628,10 +628,10 @@ class TypesGenerator {
 
   const coreTypesDir = path.join(PROJECT_DIR, 'packages', 'playwright-core', 'types');
   if (!fs.existsSync(coreTypesDir))
-    fs.mkdirSync(coreTypesDir)
+    fs.mkdirSync(coreTypesDir);
   const playwrightTypesDir = path.join(PROJECT_DIR, 'packages', 'playwright', 'types');
   if (!fs.existsSync(playwrightTypesDir))
-    fs.mkdirSync(playwrightTypesDir)
+    fs.mkdirSync(playwrightTypesDir);
   writeFile(path.join(coreTypesDir, 'protocol.d.ts'), fs.readFileSync(path.join(PROJECT_DIR, 'packages', 'playwright-core', 'src', 'server', 'chromium', 'protocol.d.ts'), 'utf8'), false);
   writeFile(path.join(coreTypesDir, 'types.d.ts'), await generateCoreTypes(), true);
   writeFile(path.join(playwrightTypesDir, 'test.d.ts'), await generateTestTypes(), true);

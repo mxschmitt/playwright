@@ -1,15 +1,14 @@
 test/assets/modernizr.js
 /tests/third_party/
 /packages/*/lib/
-*.js
 /packages/playwright-core/src/generated/*
 /packages/playwright-core/src/third_party/
 /packages/playwright-core/types/*
 /packages/playwright-ct-core/src/generated/*
+/packages/playwright-core/bundles/utils/src/third_party/
 /index.d.ts
 node_modules/
-browser_patches/*/checkout/
-browser_patches/chromium/output/
+browser_patches/
 **/*.d.ts
 output/
 test-results/
@@ -18,4 +17,4 @@ tests/installation/fixture-scripts/
 examples/
 DEPS
 .cache/
-utils/
+tests/assets/

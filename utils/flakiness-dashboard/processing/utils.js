@@ -26,15 +26,15 @@ const gunzipAsync = util.promisify(zlib.gunzip);
 const AZURE_STORAGE_ACCOUNT = 'folioflakinessdashboard';
 
 const blobServiceClient = new BlobServiceClient(
-  `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net`,
-  defaultAzureCredential
+    `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net`,
+    defaultAzureCredential
 );
 
 function flattenSpecs(suite, result = [], titlePaths = []) {
   if (suite.suites) {
     for (const child of suite.suites) {
       const isFileSuite = child.column === 0 && child.line === 0;
-      flattenSpecs(child, result, (!isFileSuite && child.title) ? [...titlePaths, child.title]: titlePaths);
+      flattenSpecs(child, result, (!isFileSuite && child.title) ? [...titlePaths, child.title] : titlePaths);
     }
   }
   for (const spec of suite.specs || []) {
@@ -90,4 +90,4 @@ async function deleteBlob(container, blobName) {
   await containerClient.deleteBlob(blobName, {});
 }
 
-module.exports = {gzipAsync, gunzipAsync, flattenSpecs, SimpleBlob, blobServiceClient, deleteBlob};
+module.exports = { gzipAsync, gunzipAsync, flattenSpecs, SimpleBlob, blobServiceClient, deleteBlob };

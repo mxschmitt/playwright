@@ -1,10 +1,25 @@
 #!/usr/bin/env node
+/**
+ * Copyright (c) Microsoft Corporation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const fs = require('fs');
 const util = require('util');
 const path = require('path');
-const {spawn} = require('child_process');
-const {registryDirectory} = require('playwright-core/lib/server/registry/index');
+const { spawn } = require('child_process');
+const { registryDirectory } = require('playwright-core/lib/server/registry/index');
 
 const readdirAsync = util.promisify(fs.readdir.bind(fs));
 const readFileAsync = util.promisify(fs.readFile.bind(fs));
@@ -21,7 +36,7 @@ const readline = require('readline');
 const DL_OPEN_LIBRARIES = {
   chromium: [],
   firefox: [],
-  webkit: [ 'libGLESv2.so.2' ],
+  webkit: ['libGLESv2.so.2'],
 };
 
 (async () => {
@@ -52,7 +67,7 @@ const DL_OPEN_LIBRARIES = {
       allMissingLibraries.add(library);
     }
 
-    const {stdout} = await runCommand('find', [descriptor.path, '-type', 'f']);
+    const { stdout } = await runCommand('find', [descriptor.path, '-type', 'f']);
     descriptor.filePaths = stdout.trim().split('\n').map(f => f.trim()).filter(filePath => !filePath.toLowerCase().endsWith('.sh'));
     await Promise.all(descriptor.filePaths.map(async filePath => {
       const missingLibraries = await missingFileDependencies(filePath);
@@ -126,7 +141,7 @@ const DL_OPEN_LIBRARIES = {
     input: process.stdin,
     output: process.stdout
   });
-  const promptAsync = (question) => new Promise(resolve => rl.question(question, resolve));
+  const promptAsync = question => new Promise(resolve => rl.question(question, resolve));
 
   // Report all ambiguities that were failed to resolve.
   for (const [library, packages] of ambiguityLibraries) {
@@ -205,7 +220,7 @@ function pickPackage(library, packages) {
 }
 
 async function findPackages(libraryName) {
-  const {stdout} = await runCommand('apt-file', ['search', libraryName]);
+  const { stdout } = await runCommand('apt-file', ['search', libraryName]);
   if (!stdout.trim())
     return [];
   const libs = stdout.trim().split('\n').map(line => line.split(':')[0]);
@@ -213,14 +228,14 @@ async function findPackages(libraryName) {
 }
 
 async function fileDependencies(filePath) {
-  const {stdout, code} = await lddAsync(filePath);
+  const { stdout, code } = await lddAsync(filePath);
   if (code !== 0)
     return [];
   const deps = stdout.split('\n').map(line => {
     line = line.trim();
     const missing = line.includes('not found');
     const name = line.split('=>')[0].trim();
-    return {name, missing};
+    return { name, missing };
   });
   return deps;
 }
@@ -231,7 +246,7 @@ async function missingFileDependencies(filePath) {
 }
 
 async function lddAsync(filePath) {
-  let LD_LIBRARY_PATH = [];
+  const LD_LIBRARY_PATH = [];
   // Some shared objects inside browser sub-folders link against libraries that
   // ship with the browser. We consider these to be included, so we want to account
   // for them in the LD_LIBRARY_PATH.
@@ -249,13 +264,13 @@ async function lddAsync(filePath) {
 function runCommand(command, args, options = {}) {
   const childProcess = spawn(command, args, options);
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     let stdout = '';
     let stderr = '';
     childProcess.stdout.on('data', data => stdout += data);
     childProcess.stderr.on('data', data => stderr += data);
-    childProcess.on('close', (code) => {
-      resolve({stdout, stderr, code});
+    childProcess.on('close', code => {
+      resolve({ stdout, stderr, code });
     });
   });
 }
@@ -279,7 +294,7 @@ async function getDistributionName() {
 function currentTime() {
   const date = new Date();
   const dateTimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' });
-  const [{ value: month },,{ value: day },,{ value: year }] = dateTimeFormat .formatToParts(date );
+  const [{ value: month },, { value: day },, { value: year }] = dateTimeFormat.formatToParts(date);
   return `${month} ${day}, ${year}`;
 }
 

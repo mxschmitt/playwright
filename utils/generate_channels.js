@@ -47,7 +47,7 @@ function inlineType(type, indent, wrapEnums = false) {
     if (channels.has(type)) {
       let derived = derivedClasses.get(type) || [];
       derived = [...derived, type];
-      return { ts: `${type}Channel`, scheme: `tChannel([${derived.map(c => `'${c}'`).join(', ')}])` , optional };
+      return { ts: `${type}Channel`, scheme: `tChannel([${derived.map(c => `'${c}'`).join(', ')}])`, optional };
     }
     if (type === 'Channel')
       return { ts: `Channel`, scheme: `tChannel('*')`, optional };
@@ -108,7 +108,7 @@ function objectType(props, indent, onlyOptional = false) {
 }
 
 const channels_ts = [
-`/**
+  `/**
  * Copyright (c) Microsoft Corporation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -135,7 +135,7 @@ export interface Channel {
 `];
 
 const validator_ts = [
-`/**
+  `/**
  * Copyright (c) Microsoft Corporation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -159,7 +159,7 @@ export { ValidationError, findValidator, maybeFindValidator, createMetadataValid
 `];
 
 const debug_ts = [
-`/**
+  `/**
  * Copyright (c) Microsoft Corporation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -267,7 +267,7 @@ for (const [name, item] of Object.entries(protocol)) {
       const paramsName = `${channelName}${titleCase(eventName)}Event`;
       ts_types.set(paramsName, parameters.ts);
       channels_ts.push(`  on(event: '${eventName}', callback: (params: ${paramsName}) => void): this;`);
-      eventTypes.push({eventName, eventType: paramsName});
+      eventTypes.push({ eventName, eventType: paramsName });
       addScheme(paramsName, event.parameters ? parameters.scheme : `tOptional(tObject({}))`);
       for (const derived of derivedClasses.get(channelName) || [])
         addScheme(`${derived}${titleCase(eventName)}Event`, `tType('${paramsName}')`);
@@ -319,8 +319,8 @@ for (const [name, item] of Object.entries(protocol)) {
     channels_ts.push(``);
 
     channels_ts.push(`export interface ${channelName}Events {`);
-    for (const {eventName, eventType} of eventTypes)
-        channels_ts.push(`  '${eventName}': ${eventType};`);
+    for (const { eventName, eventType } of eventTypes)
+      channels_ts.push(`  '${eventName}': ${eventType};`);
     channels_ts.push(`}\n`);
 
   } else if (item.type === 'object') {
@@ -330,7 +330,7 @@ for (const [name, item] of Object.entries(protocol)) {
     addScheme(name, inner.scheme);
   } else if (item.type === 'enum') {
     const ts = item.literals.map(literal => `'${literal}'`).join(' | ');
-    channels_ts.push(`export type ${name} = ${ts};`)
+    channels_ts.push(`export type ${name} = ${ts};`);
     addScheme(name, `tEnum([${item.literals.map(literal => `'${literal}'`).join(', ')}])`);
   }
 }

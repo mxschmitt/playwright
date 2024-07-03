@@ -105,8 +105,8 @@ async function replaceEsbuildHeader(content, outFileJs) {
 const inlineCSSPlugin = {
   name: 'inlineCSSPlugin',
   setup(build) {
-    build.onLoad({ filter: /\.css$/ }, async (args) => {
-      const f = await fs.promises.readFile(args.path)
+    build.onLoad({ filter: /\.css$/ }, async args => {
+      const f = await fs.promises.readFile(args.path);
       const css = await esbuild.transform(f, { loader: 'css', minify: true });
       return { loader: 'text', contents: css.code };
     });

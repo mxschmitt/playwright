@@ -75,11 +75,11 @@ function _innerRenderNodes(nodes, maxColumns = 80, wrapParagraphs = true) {
 
 function _wrapCode(lines) {
   let i = 0;
-  let out = [];
+  const out = [];
   for (let line of lines) {
     line = line.replace(/[&]/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     if (i < lines.length - 1)
-      line = line + "<br/>";
+      line = line + '<br/>';
     out.push(line);
     i++;
   }
@@ -163,4 +163,4 @@ function renderTextOnly(nodes, maxColumns = 80) {
   return result.summary;
 }
 
-module.exports = { renderXmlDoc, renderTextOnly }
+module.exports = { renderXmlDoc, renderTextOnly };

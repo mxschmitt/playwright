@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-//@ts-check
+// @ts-check
 
 const playwright = require('playwright-core');
 const fs = require('fs');
@@ -24,7 +24,7 @@ const { parseApi } = require('./api_parser');
 const missingDocs = require('./missingDocs');
 const md = require('../markdown');
 const docs = require('./documentation');
-const toKebabCase = require('lodash/kebabCase')
+const toKebabCase = require('lodash/kebabCase');
 
 /** @typedef {import('./documentation').Type} Type */
 /** @typedef {import('../markdown').MarkdownNode} MarkdownNode */
@@ -36,7 +36,7 @@ const dirtyFiles = new Set();
 run().catch(e => {
   console.error(e);
   process.exit(1);
-});;
+});
 
 function getAllMarkdownFiles(dirPath, filePaths = []) {
   for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
@@ -91,30 +91,30 @@ async function run() {
 
   // Update device descriptors
   {
-    const devicesDescriptorsSourceFile = path.join(PROJECT_DIR, 'packages', 'playwright-core', 'src', 'server', 'deviceDescriptorsSource.json')
-    const devicesDescriptors = require(devicesDescriptorsSourceFile)
+    const devicesDescriptorsSourceFile = path.join(PROJECT_DIR, 'packages', 'playwright-core', 'src', 'server', 'deviceDescriptorsSource.json');
+    const devicesDescriptors = require(devicesDescriptorsSourceFile);
     for (const deviceName of Object.keys(devicesDescriptors)) {
       switch (devicesDescriptors[deviceName].defaultBrowserType) {
         case 'chromium':
           devicesDescriptors[deviceName].userAgent = devicesDescriptors[deviceName].userAgent.replace(
-            /(.*Chrome\/)(.*?)( .*)/,
-            `$1${versions.chromium}$3`
+              /(.*Chrome\/)(.*?)( .*)/,
+              `$1${versions.chromium}$3`
           ).replace(
-            /(.*Edg\/)(.*?)$/,
-            `$1${versions.chromium}`
-          )
+              /(.*Edg\/)(.*?)$/,
+              `$1${versions.chromium}`
+          );
           break;
         case 'firefox':
           devicesDescriptors[deviceName].userAgent = devicesDescriptors[deviceName].userAgent.replace(
-            /^(.*Firefox\/)(.*?)( .*?)?$/,
-            `$1${versions.firefox}$3`
-          ).replace(/^(.*rv:)(.*)(\).*?)$/, `$1${versions.firefox}$3`)
+              /^(.*Firefox\/)(.*?)( .*?)?$/,
+              `$1${versions.firefox}$3`
+          ).replace(/^(.*rv:)(.*)(\).*?)$/, `$1${versions.firefox}$3`);
           break;
         case 'webkit':
           devicesDescriptors[deviceName].userAgent = devicesDescriptors[deviceName].userAgent.replace(
-            /(.*Version\/)(.*?)( .*)/,
-            `$1${versions.webkit}$3`
-          )
+              /(.*Version\/)(.*?)( .*)/,
+              `$1${versions.webkit}$3`
+          );
           break;
         default:
           break;
@@ -135,9 +135,9 @@ async function run() {
         let documentation = parseApi(path.join(documentationRoot, 'api'));
         if (lang === 'js') {
           documentation = documentation.mergeWith(
-            parseApi(path.join(documentationRoot, 'test-api'), path.join(documentationRoot, 'api', 'params.md'))
+              parseApi(path.join(documentationRoot, 'test-api'), path.join(documentationRoot, 'api', 'params.md'))
           ).mergeWith(
-            parseApi(path.join(documentationRoot, 'test-reporter-api'))
+              parseApi(path.join(documentationRoot, 'test-reporter-api'))
           );
         }
         documentation.filterForLanguage(lang);
@@ -154,11 +154,11 @@ async function run() {
         for (const cls of documentation.classesArray) {
           const filePath = path.join(documentationRoot, 'api', 'class-' + cls.name.toLowerCase() + '.md');
           for (const member of cls.membersArray) {
-            const memberHash = filePath + '#' + toKebabCase(cls.name).toLowerCase() + '-' + toKebabCase(member.name).toLowerCase()
+            const memberHash = filePath + '#' + toKebabCase(cls.name).toLowerCase() + '-' + toKebabCase(member.name).toLowerCase();
             mdSections.add(memberHash);
             for (const arg of member.argsArray) {
               mdSections.add(memberHash + '-option-' + toKebabCase(arg.name).toLowerCase());
-              if (arg.name === "options" && arg.type) {
+              if (arg.name === 'options' && arg.type) {
                 for (const option of arg.type.deepProperties())
                   mdSections.add(memberHash + '-option-' + toKebabCase(option.name).toLowerCase());
               }
@@ -267,16 +267,16 @@ async function run() {
       console.log('============================');
       console.log('ERROR: missing documentation:');
       errors.forEach(e => console.log(e));
-      console.log('============================')
+      console.log('============================');
       process.exit(1);
     }
   }
 
   if (dirtyFiles.size) {
-    console.log('============================')
+    console.log('============================');
     console.log('ERROR: generated files have changed, this is only error if happens in CI:');
     [...dirtyFiles].forEach(f => console.log(f));
-    console.log('============================')
+    console.log('============================');
     process.exit(1);
   }
   process.exit(0);
@@ -300,9 +300,9 @@ async function getBrowserVersions() {
   const names = ['chromium', 'firefox', 'webkit'];
   const browsers = await Promise.all(names.map(name => playwright[name].launch()));
   const result = {};
-  for (let i = 0; i < names.length; i++) {
+  for (let i = 0; i < names.length; i++)
     result[names[i]] = browsers[i].version();
-  }
+
   await Promise.all(browsers.map(browser => browser.close()));
   return result;
 }

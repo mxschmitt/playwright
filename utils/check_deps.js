@@ -154,9 +154,9 @@ async function innerCheckDeps(root) {
       const fullStart = node.getFullStart();
       const commentRanges = ts.getLeadingCommentRanges(text, fullStart);
       for (const range of commentRanges || []) {
-          const comment = text.substring(range.pos, range.end);
-          if (comment.includes('@no-check-deps'))
-            return;
+        const comment = text.substring(range.pos, range.end);
+        if (comment.includes('@no-check-deps'))
+          return;
       }
 
       if (importName.startsWith('@'))
@@ -200,7 +200,7 @@ async function innerCheckDeps(root) {
       depsCache[depsDirectory] = deps;
     }
 
-    return [...(deps['*'] || []), ...(deps[path.relative(depsDirectory, from)] || [])]
+    return [...(deps['*'] || []), ...(deps[path.relative(depsDirectory, from)] || [])];
   }
 
   function allowImport(from, to, mergedDeps) {
