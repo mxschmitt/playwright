@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import child_process from 'child_process';
+import { Worker } from 'worker_threads';
 import { EventEmitter } from 'events';
 import { debug } from 'playwright-core/lib/utilsBundle';
 import type { EnvProducedPayload, ProcessInitParams } from '../common/ipc';
@@ -30,9 +30,9 @@ export type ProcessExitData = {
 };
 
 export class ProcessHost extends EventEmitter {
-  private process: child_process.ChildProcess | undefined;
+  private worker: Worker | undefined;
   private _didSendStop = false;
-  private _processDidExit = false;
+  private _workerDidExit = false;
   private _didExitAndRanOnExit = false;
   private _runnerScript: string;
   private _lastMessageId = 0;
@@ -49,30 +49,39 @@ export class ProcessHost extends EventEmitter {
   }
 
   async startRunner(runnerParams: any, options: { onStdOut?: (chunk: Buffer | string) => void, onStdErr?: (chunk: Buffer | string) => void } = {}): Promise<ProcessExitData | undefined> {
-    assert(!this.process, 'Internal error: starting the same process twice');
-    this.process = child_process.fork(require.resolve('../common/process'), {
-      detached: false,
+    assert(!this.worker, 'Internal error: starting the same worker twice');
+
+    const workerData = {
+      runnerScript: this._runnerScript,
+      processName: this._processName,
       env: {
         ...process.env,
         ...this._extraEnv,
         ...(esmLoaderRegistered ? { PW_TS_ESM_LOADER_ON: '1' } : {}),
       },
-      stdio: [
-        'ignore',
-        options.onStdOut ? 'pipe' : 'inherit',
-        (options.onStdErr && !process.env.PW_RUNNER_DEBUG) ? 'pipe' : 'inherit',
-        'ipc',
-      ],
+      runnerParams,
+    };
+
+    const workerOptions = {
+      env: workerData.env,
       ...(process.env.PW_TS_ESM_LEGACY_LOADER_ON ? { execArgv: execArgvWithExperimentalLoaderOptions() } : {}),
-    });
-    this.process.on('exit', async (code, signal) => {
-      this._processDidExit = true;
+    };
+
+    this.worker = new Worker(require.resolve('../common/process'), { workerData, ...workerOptions });
+
+    this.worker.on('exit', async code => {
+      this._workerDidExit = true;
       await this.onExit();
       this._didExitAndRanOnExit = true;
-      this.emit('exit', { unexpectedly: !this._didSendStop, code, signal } as ProcessExitData);
+      this.emit('exit', { unexpectedly: !this._didSendStop, code, signal: null } as ProcessExitData);
     });
-    this.process.on('error', e => {});  // do not yell at a send to dead process.
-    this.process.on('message', (message: any) => {
+
+    this.worker.on('error', error => {
+      // Handle worker errors
+      this.emit('error', error);
+    });
+
+    this.worker.on('message', (message: any) => {
       if (debug.enabled('pw:test:protocol'))
         debug('pw:test:protocol')('◀ RECV ' + JSON.stringify(message));
       if (message.method === '__env_produced__') {
@@ -99,12 +108,12 @@ export class ProcessHost extends EventEmitter {
     });
 
     if (options.onStdOut)
-      this.process.stdout?.on('data', options.onStdOut);
+      this.worker.stdout.on('data', options.onStdOut);
     if (options.onStdErr)
-      this.process.stderr?.on('data', options.onStdErr);
+      this.worker.stderr.on('data', options.onStdErr);
 
     const error = await new Promise<ProcessExitData | undefined>(resolve => {
-      this.process!.once('exit', (code, signal) => resolve({ unexpectedly: true, code, signal }));
+      this.worker!.once('exit', code => resolve({ unexpectedly: true, code, signal: null }));
       this.once('ready', () => resolve(undefined));
     });
 
@@ -143,7 +152,7 @@ export class ProcessHost extends EventEmitter {
   }
 
   async stop() {
-    if (!this._processDidExit && !this._didSendStop) {
+    if (!this._workerDidExit && !this._didSendStop) {
       this.send({ method: '__stop__' });
       this._didSendStop = true;
     }
@@ -162,6 +171,6 @@ export class ProcessHost extends EventEmitter {
   private send(message: { method: string, params?: any }) {
     if (debug.enabled('pw:test:protocol'))
       debug('pw:test:protocol')('SEND ► ' + JSON.stringify(message));
-    this.process?.send(message);
+    this.worker?.postMessage(message);
   }
 }
