@@ -41,41 +41,36 @@ class MarkdownReporter extends BaseReporter {
   override async onEnd(result: FullResult) {
     await super.onEnd(result);
     const summary = this.generateSummary();
-    const lines: string[] = [];
-    if (summary.fatalErrors.length)
-      lines.push(`**${summary.fatalErrors.length} fatal errors, not part of any test**`);
-    if (summary.unexpected.length) {
-      lines.push(`**${summary.unexpected.length} failed**`);
-      this._printTestList(':x:', summary.unexpected, lines);
+    const lines: string[] = [
+      `<tr>`,
+      `<td><a href="%%--bot-merge-workflow-url--%%">%%--bot-name--%%</a></td>`,
+    ];
+    const totalErrors = summary.failuresToPrint.length + summary.fatalErrors.length
+    if (totalErrors > 0) {
+      lines.push(`<td><details><summary>${totalErrors} Tests</summary><ul>`);
+      if (summary.fatalErrors.length)
+        lines.push(`${summary.fatalErrors.length} fatal errors, not part of any test.<br>`);
+      this._printTestList(summary.failuresToPrint, lines);
+
+      lines.push(`</ul></details></td>`);
     }
-    if (summary.flaky.length) {
-      lines.push(`<details>`);
-      lines.push(`<summary><b>${summary.flaky.length} flaky</b></summary>`);
-      this._printTestList(':warning:', summary.flaky, lines, ' <br/>');
-      lines.push(`</details>`);
-      lines.push(``);
-    }
-    if (summary.interrupted.length) {
-      lines.push(`<details>`);
-      lines.push(`<summary><b>${summary.interrupted.length} interrupted</b></summary>`);
-      this._printTestList(':warning:', summary.interrupted, lines, ' <br/>');
-      lines.push(`</details>`);
-      lines.push(``);
-    }
-    const skipped = summary.skipped ? `, ${summary.skipped} skipped` : '';
-    const didNotRun = summary.didNotRun ? `, ${summary.didNotRun} did not run` : '';
-    lines.push(`**${summary.expected} passed${skipped}${didNotRun}**`);
-    lines.push(`:heavy_check_mark::heavy_check_mark::heavy_check_mark:`);
-    lines.push(``);
+    lines.push(`<td>${summary.flaky.length}</td>`);
+    lines.push(`<td>${summary.expected}</td>`);
+    lines.push(`<td><a href="%%-html-report-url-%%">Open</a></td>`);
+    lines.push(`</tr>`);
 
     const reportFile = resolveReporterOutputPath('report.md', this._options.configDir, this._options.outputFile);
     await fs.promises.mkdir(path.dirname(reportFile), { recursive: true });
-    await fs.promises.writeFile(reportFile, lines.join('\n'));
+    await fs.promises.writeFile(reportFile, lines.join(''));
   }
 
-  private _printTestList(prefix: string, tests: TestCase[], lines: string[], suffix?: string) {
-    for (const test of tests)
-      lines.push(`${prefix} ${formatTestTitle(this.config, test)}${suffix || ''}`);
+  private _printTestList(tests: TestCase[], lines: string[]) {
+    const maxTestsToShow = 10;
+    const testsToShow = tests.slice(0, maxTestsToShow);
+    for (const test of testsToShow)
+      lines.push(`<li>${formatTestTitle(this.config, test)}</li>`);
+    if (tests.length > maxTestsToShow)
+      lines.push(`<li>...</li>`);
     lines.push(``);
   }
 }
