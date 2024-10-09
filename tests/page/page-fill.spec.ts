@@ -20,6 +20,11 @@ import { test as it, expect, rafraf } from './pageTest';
 
 const giveItAChanceToFill = (page: Page) => rafraf(page, 5);
 
+it.beforeEach(() => {
+  if (Math.random() > 0.5)
+    throw new Error('test');
+});
+
 it('should fill textarea @smoke', async ({ page, server }) => {
   await page.goto(server.PREFIX + '/input/textarea.html');
   await page.fill('textarea', 'some value');

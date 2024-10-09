@@ -1,4 +1,6 @@
+import MarkdownReporter from '../../packages/playwright/lib/reporters/markdown';
+
 export default {
   testDir: '../../tests',
-  reporter: [['markdown'], ['html']]
+  reporter: [[MarkdownReporter], ['html']]
 };

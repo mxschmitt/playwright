@@ -81,43 +81,48 @@ jobs:
             core.error('No pull request found for commit ' + context.sha + ' and workflow triggered by: ' + context.payload.workflow_run.event);
             return;
           }
-          {
-            // Mark previous comments as outdated by minimizing them.
-            const { data: comments } = await github.rest.issues.listComments({
-              ...context.repo,
-              issue_number: prNumber,
-            });
-            for (const comment of comments) {
-              if (comment.user.login === 'github-actions[bot]' && /\[Test results\]\(https:\/\/.+?\) for "${{ github.event.workflow_run.name }}"/.test(comment.body)) {
-                await github.graphql(`
-                  mutation {
-                    minimizeComment(input: {subjectId: "${comment.node_id}", classifier: OUTDATED}) {
-                      clientMutationId
-                    }
-                  }
-                `);
-              }
-            }
-          }
           const reportDir = 'run-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}-${{ github.sha }}';
           const reportUrl = `https://mspwblobreport.z1.web.core.windows.net/${reportDir}/index.html#?q=s%3Afailed%20s%3Aflaky`;
-          core.notice('Report url: ' + reportUrl);
           const mergeWorkflowUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
           const reportMd = await fs.promises.readFile('report.md', 'utf8');
-          function formatComment(lines) {
-            let body = lines.join('\n');
-            if (body.length > 65535)
-              body = body.substring(0, 65000) + `... ${body.length - 65000} more characters`;
-            return body;
-          }
-          const { data: response } = await github.rest.issues.createComment({
+          
+          const commitSha = '${{ github.sha }}vs${{ github.event.workflow_run.head_commit }}';
+          
+          const newTableRow = `| [${{ github.event.workflow_run.name }}](${mergeWorkflowUrl}) | ${commitSha.substring(0, 7)} ${reportMd} [Open](${reportUrl}) |`;
+          
+          const { data: pullRequest } = await github.rest.pulls.get({
             ...context.repo,
-            issue_number: prNumber,
-            body: formatComment([
-              `### [Test results](${reportUrl}) for "${{ github.event.workflow_run.name }}"`,
-              reportMd,
-              '',
-              `Merge [workflow run](${mergeWorkflowUrl}).`
-            ]),
+            pull_number: prNumber,
           });
-          core.info('Posted comment: ' + response.html_url);
+          
+          let body = (pullRequest.body || '').trimEnd();
+          const mergeReportsHeader = '### Merge Reports';
+          const tableHeader = '| Bot | Commit | Failing | Flaky | Passed | HTML Report |';
+          
+          if (!body.includes(mergeReportsHeader)) {
+            body += `\n\n---\n\n${mergeReportsHeader}\n\n${tableHeader}\n|---|---|---|---|---|---|\n`;
+          }
+          
+          const lines = body.split('\n');
+          const headerIndex = lines.findIndex(line => line.includes(mergeReportsHeader));
+          const tableStartIndex = lines.findIndex((line, index) => index > headerIndex && line.includes(tableHeader));
+          
+          if (tableStartIndex !== -1) {
+            // If the table already exists in the lines array, insert the new row right after the table start index.
+            lines.splice(tableStartIndex + 1, 0, newTableRow);
+          } else if (headerIndex !== -1) {
+            // If the header exists but the table does not, insert the table header and the new row right after the header index.
+            lines.splice(headerIndex + 1, 0, tableHeader, '|---|---|---|---|---|---|', newTableRow);
+          } else {
+            // If neither the header nor the table exists, append the header, table header, and new row to the end of the lines array.
+            lines.push(`\n\n---\n\n${mergeReportsHeader}\n\n${tableHeader}\n|---|---|---|---|---|---|\n${newTableRow}`);
+          }
+          const updatedBody = lines.join('\n');
+          
+          await github.rest.pulls.update({
+            ...context.repo,
+            pull_number: prNumber,
+            body: updatedBody,
+          });
+          
+          core.info('Updated PR description with merge report results.');
