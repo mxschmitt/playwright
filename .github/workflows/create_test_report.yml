@@ -107,16 +107,9 @@ jobs:
           const headerIndex = lines.findIndex(line => line.includes(mergeReportsHeader));
           const tableStartIndex = lines.findIndex((line, index) => index > headerIndex && line.includes(tableHeader));
           
-          if (tableStartIndex !== -1) {
-            // If the table already exists in the lines array, insert the new row right after the table start index.
-            lines.splice(tableStartIndex + 1, 0, newTableRow);
-          } else if (headerIndex !== -1) {
-            // If the header exists but the table does not, insert the table header and the new row right after the header index.
-            lines.splice(headerIndex + 1, 0, tableHeader, '|---|---|---|---|---|---|', newTableRow);
-          } else {
-            // If neither the header nor the table exists, append the header, table header, and new row to the end of the lines array.
-            lines.push(`\n\n---\n\n${mergeReportsHeader}\n\n${tableHeader}\n|---|---|---|---|---|---|\n${newTableRow}`);
-          }
+          // Insert new row after the table header
+          lines.splice(tableStartIndex, 0, newTableRow);
+
           const updatedBody = lines.join('\n');
           
           await github.rest.pulls.update({
