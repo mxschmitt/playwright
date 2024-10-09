@@ -88,7 +88,7 @@ jobs:
           
           const commitSha = '${{ github.sha }}vs${{ github.event.workflow_run.head_commit }}';
           
-          const newTableRow = `| [${{ github.event.workflow_run.name }}](${mergeWorkflowUrl}) | ${commitSha.substring(0, 7)} ${reportMd} [Open](${reportUrl}) |`;
+          const newTableRow = `| [${{ github.event.workflow_run.name }}](${mergeWorkflowUrl}) | ${commitSha} ${reportMd} [Open](${reportUrl}) |`;
           
           const { data: pullRequest } = await github.rest.pulls.get({
             ...context.repo,
@@ -108,7 +108,7 @@ jobs:
           const tableStartIndex = lines.findIndex((line, index) => index > headerIndex && line.includes(tableHeader));
           
           // Insert new row after the table header
-          lines.splice(tableStartIndex, 0, newTableRow);
+          lines.splice(tableStartIndex + 1, 0, newTableRow);
 
           const updatedBody = lines.join('\n');
           
