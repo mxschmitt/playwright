@@ -37,20 +37,20 @@ jobs:
       env:
         NODE_OPTIONS: --max-old-space-size=4096
 
-    - name: Azure Login
-      uses: azure/login@v2
-      with:
-        client-id: ${{ secrets.AZURE_BLOB_REPORTS_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_BLOB_REPORTS_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_BLOB_REPORTS_SUBSCRIPTION_ID }}
+    # - name: Azure Login
+    #   uses: azure/login@v2
+    #   with:
+    #     client-id: ${{ secrets.AZURE_BLOB_REPORTS_CLIENT_ID }}
+    #     tenant-id: ${{ secrets.AZURE_BLOB_REPORTS_TENANT_ID }}
+    #     subscription-id: ${{ secrets.AZURE_BLOB_REPORTS_SUBSCRIPTION_ID }}
 
-    - name: Upload HTML report to Azure
-      run: |
-        REPORT_DIR='run-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}-${{ github.sha }}'
-        azcopy cp --recursive "./playwright-report/*" "https://mspwblobreport.blob.core.windows.net/\$web/$REPORT_DIR"
-        echo "Report url: https://mspwblobreport.z1.web.core.windows.net/$REPORT_DIR/index.html"
-      env:
-        AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+    # - name: Upload HTML report to Azure
+    #   run: |
+    #     REPORT_DIR='run-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}-${{ github.sha }}'
+    #     azcopy cp --recursive "./playwright-report/*" "https://mspwblobreport.blob.core.windows.net/\$web/$REPORT_DIR"
+    #     echo "Report url: https://mspwblobreport.z1.web.core.windows.net/$REPORT_DIR/index.html"
+    #   env:
+    #     AZCOPY_AUTO_LOGIN_TYPE: AZCLI
 
     - name: Read pull request number
       uses: ./.github/actions/download-artifact
