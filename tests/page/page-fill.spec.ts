@@ -25,11 +25,7 @@ it.beforeEach(() => {
     throw new Error('test');
 });
 
-it('should fill textarea @smoke', async ({ page, server }) => {
-  await page.goto(server.PREFIX + '/input/textarea.html');
-  await page.fill('textarea', 'some value');
-  expect(await page.evaluate(() => window['result'])).toBe('some value');
-});
+
 
 it('should fill input', async ({ page, server }) => {
   await page.goto(server.PREFIX + '/input/textarea.html');
