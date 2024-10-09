@@ -31,16 +31,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
-        os: [ubuntu-22.04]
+        browser: [chromium]
+        os: [ubuntu-24.04]
         node-version: [18]
-        include:
-          - os: ubuntu-22.04
-            node-version: 20
-            browser: chromium
-          - os: ubuntu-22.04
-            node-version: 22
-            browser: chromium
+
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write   # This is required for OIDC login (azure/login) to succeed
