@@ -86,7 +86,7 @@ jobs:
           const mergeWorkflowUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
           const reportMd = await fs.promises.readFile('report.md', 'utf8');
           
-          const commitSha = '${{ github.sha }}vs${{ github.event.workflow_run.head_commit }}';
+          const commitSha = '${{ github.sha }}vs${{ github.event.workflow_run.head_commit.id }}';
           
           const newTableRow = `| [${{ github.event.workflow_run.name }}](${mergeWorkflowUrl}) | ${commitSha} ${reportMd} [Open](${reportUrl}) |`;
           
@@ -107,8 +107,7 @@ jobs:
           const headerIndex = lines.findIndex(line => line.includes(mergeReportsHeader));
           const tableStartIndex = lines.findIndex((line, index) => index > headerIndex && line.includes(tableHeader));
           
-          // Insert new row after the table header
-          lines.splice(tableStartIndex + 1, 0, newTableRow);
+          lines.splice(tableStartIndex + 2, 0, newTableRow);
 
           const updatedBody = lines.join('\n');
           
