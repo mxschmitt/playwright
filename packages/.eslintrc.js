@@ -17,5 +17,6 @@ module.exports = {
       "property": "exit",
       "message": "Please use gracefullyProcessExitDoNotHang function to exit the process.",
     }],
+    "@typescript-eslint/no-unused-vars": [2, {args: "all", "argsIgnorePattern": "^_"}],
   }
 };

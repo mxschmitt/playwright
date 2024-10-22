@@ -58,7 +58,8 @@ export function useNetworkTabModel(model: MultiTraceModel | undefined, selectedT
     });
     return filtered;
   }, [model, selectedTime]);
-  const contextIdMap = React.useMemo(() => new ContextIdMap(model), [model]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const contextIdMap = React.useMemo(() => new ContextIdMap(), [model]);
   return { resources, contextIdMap };
 }
 
@@ -214,7 +215,7 @@ class ContextIdMap {
   private _lastPageId = 0;
   private _lastApiRequestContextId = 0;
 
-  constructor(model: MultiTraceModel | undefined) {}
+  constructor() {}
 
   contextId(resource: Entry): string {
     if (resource.pageref)

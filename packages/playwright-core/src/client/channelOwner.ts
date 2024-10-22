@@ -16,7 +16,7 @@
 
 import { EventEmitter } from './eventEmitter';
 import type * as channels from '@protocol/channels';
-import { maybeFindValidator, ValidationError, type ValidatorContext } from '../protocol/validator';
+import { maybeFindValidator, ValidationError } from '../protocol/validator';
 import { debugLogger } from '../utils/debugLogger';
 import type { ExpectZone } from '../utils/stackTrace';
 import { captureLibraryStackTrace, stringifyStackFrames } from '../utils/stackTrace';
@@ -239,7 +239,7 @@ function logApiCall(logger: Logger | undefined, message: string, isNested: boole
   debugLogger.log('api', message);
 }
 
-function tChannelImplToWire(names: '*' | string[], arg: any, path: string, context: ValidatorContext) {
+function tChannelImplToWire(names: '*' | string[], arg: any, path: string) {
   if (arg._object instanceof ChannelOwner && (names === '*' || names.includes(arg._object._type)))
     return { guid: arg._object._guid };
   throw new ValidationError(`${path}: expected channel ${names.toString()}`);

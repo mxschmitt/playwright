@@ -329,7 +329,7 @@ export class BrowserContext extends ChannelOwner<channels.BrowserContextChannel>
 
   async exposeFunction(name: string, callback: Function): Promise<void> {
     await this._channel.exposeBinding({ name });
-    const binding = (source: structs.BindingSource, ...args: any[]) => callback(...args);
+    const binding = (_: structs.BindingSource, ...args: any[]) => callback(...args);
     this._bindings.set(name, binding);
   }
 

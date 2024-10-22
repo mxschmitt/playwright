@@ -41,7 +41,7 @@ import { JsonPipe } from './jsonPipe';
 import { APIRequestContext } from './fetch';
 import { LocalUtils } from './localUtils';
 import { Tracing } from './tracing';
-import { findValidator, ValidationError, type ValidatorContext } from '../protocol/validator';
+import { findValidator, ValidationError } from '../protocol/validator';
 import { createInstrumentation } from './clientInstrumentation';
 import type { ClientInstrumentation } from './clientInstrumentation';
 import { formatCallLog, rewriteErrorMessage, zones } from '../utils';
@@ -63,7 +63,7 @@ class DummyChannelOwner extends ChannelOwner {
 
 export class Connection extends EventEmitter {
   readonly _objects = new Map<string, ChannelOwner>();
-  onmessage = (message: object): void => {};
+  onmessage = (_message: any): void => {};
   private _lastId = 0;
   private _callbacks = new Map<number, { resolve: (a: any) => void, reject: (a: Error) => void, apiName: string | undefined, type: string, method: string }>();
   private _rootObject: Root;
@@ -203,7 +203,7 @@ export class Connection extends EventEmitter {
     this.emit('close');
   }
 
-  private _tChannelImplFromWire(names: '*' | string[], arg: any, path: string, context: ValidatorContext) {
+  private _tChannelImplFromWire(names: '*' | string[], arg: any, path: string) {
     if (arg && typeof arg === 'object' && typeof arg.guid === 'string') {
       const object = this._objects.get(arg.guid)!;
       if (!object)

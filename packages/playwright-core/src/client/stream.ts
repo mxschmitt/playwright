@@ -50,7 +50,7 @@ class StreamImpl extends Readable {
 
   override _destroy(error: Error | null, callback: (error: Error | null | undefined) => void): void {
     // Stream might be destroyed after the connection was closed.
-    this._channel.close().catch(e => null);
+    this._channel.close().catch(() => {});
     super._destroy(error, callback);
   }
 }

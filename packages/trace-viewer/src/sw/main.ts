@@ -24,7 +24,7 @@ import { TraceVersionError } from './traceModernizer';
 // @ts-ignore
 declare const self: ServiceWorkerGlobalScope;
 
-self.addEventListener('install', function(event: any) {
+self.addEventListener('install', function() {
   self.skipWaiting();
 });
 

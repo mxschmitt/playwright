@@ -31,7 +31,7 @@ export function applyTheme() {
     if (event.target.document.nodeType === Node.DOCUMENT_NODE)
       document.body.classList.remove('inactive');
   }, false);
-  document!.defaultView!.addEventListener('blur', event => {
+  document!.defaultView!.addEventListener('blur', () => {
     document.body.classList.add('inactive');
   }, false);
 

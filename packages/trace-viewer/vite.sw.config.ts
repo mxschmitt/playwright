@@ -44,7 +44,7 @@ export default defineConfig({
         sw: path.resolve(__dirname, 'src/sw-main.ts'),
       },
       output: {
-        entryFileNames: info => 'sw.bundle.js',
+        entryFileNames: () => 'sw.bundle.js',
         assetFileNames: () => 'sw.[hash][extname]',
         manualChunks: undefined,
       },

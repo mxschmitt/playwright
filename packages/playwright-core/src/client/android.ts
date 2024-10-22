@@ -344,7 +344,7 @@ export class AndroidInput implements api.AndroidInput {
     await this._device._channel.inputTap({ point });
   }
 
-  async swipe(from: types.Point, segments: types.Point[], steps: number) {
+  async swipe(_: types.Point, segments: types.Point[], steps: number) {
     await this._device._channel.inputSwipe({ segments, steps });
   }
 

@@ -100,7 +100,7 @@ function downloadFileNameForAttachment(attachment: TestAttachment): string {
 }
 
 export function generateTraceUrl(traces: TestAttachment[]) {
-  return `trace/index.html?${traces.map((a, i) => `trace=${new URL(a.path!, window.location.href)}`).join('&')}`;
+  return `trace/index.html?${traces.map(a => `trace=${new URL(a.path!, window.location.href)}`).join('&')}`;
 }
 
 const kMissingContentType = 'x-playwright/missing';

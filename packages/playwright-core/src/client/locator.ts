@@ -337,7 +337,7 @@ export class Locator implements api.Locator {
   }
 
   async all(): Promise<Locator[]> {
-    return new Array(await this.count()).fill(0).map((e, i) => this.nth(i));
+    return new Array(await this.count()).fill(0).map((_, i) => this.nth(i));
   }
 
   async allInnerTexts(): Promise<string[]> {

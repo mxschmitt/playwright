@@ -36,7 +36,7 @@ async function loadImage(src?: string): Promise<HTMLImageElement> {
   const image = new Image();
   if (src) {
     image.src = src;
-    await new Promise((f, r) => {
+    await new Promise(f => {
       image.onload = f;
       image.onerror = f;
     });
