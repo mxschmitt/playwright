@@ -30,8 +30,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
-        os: [ubuntu-20.04, ubuntu-24.04]
+        browser: [chromium, firefox]
+        os: [ubuntu-24.04]
+        include:
+          - browser: chromium
+            os: ubuntu-20.04
+          - browser: firefox
+            os: ubuntu-20.04
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
@@ -125,9 +130,6 @@ jobs:
         browser: [chromium, firefox, webkit]
         os: [ubuntu-24.04, macos-14-xlarge, windows-latest]
         include:
-          # We have different binaries per Ubuntu version for WebKit.
-          - browser: webkit
-            os: ubuntu-20.04
           - browser: webkit
             os: ubuntu-22.04
     runs-on: ${{ matrix.os }}
@@ -149,7 +151,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [driver, service]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
     - uses: ./.github/actions/run-test
@@ -175,7 +177,7 @@ jobs:
           - browser: webkit
           - browser: chromium
             channel: chromium-tip-of-tree
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
     - uses: ./.github/actions/run-test
