@@ -17,31 +17,31 @@
 import url from 'url';
 import path from 'path';
 
-export const colors: typeof import('../bundles/utils/node_modules/colors/safe') = require('./utilsBundleImpl').colors;
-export const debug: typeof import('../bundles/utils/node_modules/@types/debug') = require('./utilsBundleImpl').debug;
-export const diff: typeof import('../bundles/utils/node_modules/@types/diff') = require('./utilsBundleImpl').diff;
-export const dotenv: typeof import('../bundles/utils/node_modules/dotenv') = require('./utilsBundleImpl').dotenv;
-export const getProxyForUrl: typeof import('../bundles/utils/node_modules/@types/proxy-from-env').getProxyForUrl = require('./utilsBundleImpl').getProxyForUrl;
-export const HttpsProxyAgent: typeof import('../bundles/utils/node_modules/https-proxy-agent').HttpsProxyAgent = require('./utilsBundleImpl').HttpsProxyAgent;
-export const jpegjs: typeof import('../bundles/utils/node_modules/jpeg-js') = require('./utilsBundleImpl').jpegjs;
-export const lockfile: typeof import('../bundles/utils/node_modules/@types/proper-lockfile') = require('./utilsBundleImpl').lockfile;
-export const mime: typeof import('../bundles/utils/node_modules/@types/mime') = require('./utilsBundleImpl').mime;
-export const minimatch: typeof import('../bundles/utils/node_modules/@types/minimatch') = require('./utilsBundleImpl').minimatch;
-export const open: typeof import('../bundles/utils/node_modules/open') = require('./utilsBundleImpl').open;
-export const PNG: typeof import('../bundles/utils/node_modules/@types/pngjs').PNG = require('./utilsBundleImpl').PNG;
-export const program: typeof import('../bundles/utils/node_modules/commander').program = require('./utilsBundleImpl').program;
-export const progress: typeof import('../bundles/utils/node_modules/@types/progress') = require('./utilsBundleImpl').progress;
-export const SocksProxyAgent: typeof import('../bundles/utils/node_modules/socks-proxy-agent').SocksProxyAgent = require('./utilsBundleImpl').SocksProxyAgent;
-export const yaml: typeof import('../bundles/utils/node_modules/yaml') = require('./utilsBundleImpl').yaml;
-export const ws: typeof import('../bundles/utils/node_modules/@types/ws') = require('./utilsBundleImpl').ws;
-export const wsServer: typeof import('../bundles/utils/node_modules/@types/ws').WebSocketServer = require('./utilsBundleImpl').wsServer;
+export const colors: typeof import('colors/safe') = require('./utilsBundleImpl').colors;
+export const debug: typeof import('debug') = require('./utilsBundleImpl').debug;
+export const diff: typeof import('diff') = require('./utilsBundleImpl').diff;
+export const dotenv: typeof import('dotenv') = require('./utilsBundleImpl').dotenv;
+export const getProxyForUrl: typeof import('proxy-from-env').getProxyForUrl = require('./utilsBundleImpl').getProxyForUrl;
+export const HttpsProxyAgent: typeof import('https-proxy-agent').HttpsProxyAgent = require('./utilsBundleImpl').HttpsProxyAgent;
+export const jpegjs: typeof import('jpeg-js') = require('./utilsBundleImpl').jpegjs;
+export const lockfile: typeof import('proper-lockfile') = require('./utilsBundleImpl').lockfile;
+export const mime: typeof import('mime') = require('./utilsBundleImpl').mime;
+export const minimatch: typeof import('minimatch').minimatch = require('./utilsBundleImpl').minimatch;
+export const open: typeof import('open') = require('./utilsBundleImpl').open;
+export const PNG: typeof import('pngjs').PNG = require('./utilsBundleImpl').PNG;
+export const program: typeof import('commander').program = require('./utilsBundleImpl').program;
+export const progress: typeof import('progress') = require('./utilsBundleImpl').progress;
+export const SocksProxyAgent: typeof import('socks-proxy-agent').SocksProxyAgent = require('./utilsBundleImpl').SocksProxyAgent;
+export const yaml: typeof import('yaml') = require('./utilsBundleImpl').yaml;
+export const ws: typeof import('ws') = require('./utilsBundleImpl').ws;
+export const wsServer: typeof import('ws').WebSocketServer = require('./utilsBundleImpl').wsServer;
 export const wsReceiver = require('./utilsBundleImpl').wsReceiver;
 export const wsSender = require('./utilsBundleImpl').wsSender;
-export type { Command } from '../bundles/utils/node_modules/commander';
-export type { WebSocket, WebSocketServer, RawData as WebSocketRawData, EventEmitter as WebSocketEventEmitter } from '../bundles/utils/node_modules/@types/ws';
-import type { StackFrame } from '@protocol/channels';
+export type { Command } from 'commander';
+export type { WebSocket, WebSocketServer, RawData as WebSocketRawData, EventEmitter as WebSocketEventEmitter } from 'ws';
+import type { StackFrame } from '@playwright/protocol/src/channels';
 
-const StackUtils: typeof import('../bundles/utils/node_modules/@types/stack-utils') = require('./utilsBundleImpl').StackUtils;
+const StackUtils: typeof import('stack-utils') = require('./utilsBundleImpl').StackUtils;
 const stackUtils = new StackUtils({ internals: StackUtils.nodeInternals() });
 
 export function parseStackTraceLine(line: string): StackFrame | null {

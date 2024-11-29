@@ -16,9 +16,9 @@
 
 import * as roleUtils from './roleUtils';
 import { getElementComputedStyle } from './domUtils';
-import { escapeRegExp, longestCommonSubstring } from '@isomorphic/stringUtils';
+import { escapeRegExp, longestCommonSubstring } from '../../utils/isomorphic/stringUtils';
 import { yamlEscapeKeyIfNeeded, yamlEscapeValueIfNeeded } from './yaml';
-import type { AriaProps, AriaRole, AriaTemplateNode, AriaTemplateRoleNode, AriaTemplateTextNode } from '@isomorphic/ariaSnapshot';
+import type { AriaProps, AriaRole, AriaTemplateNode, AriaTemplateRoleNode, AriaTemplateTextNode } from '../../utils/isomorphic/ariaSnapshot';
 
 export type AriaNode = AriaProps & {
   role: AriaRole | 'fragment';

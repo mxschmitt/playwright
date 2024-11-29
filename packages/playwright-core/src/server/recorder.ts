@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type * as channels from '@protocol/channels';
-import type { CallLog, CallLogStatus, ElementInfo, EventData, Mode, OverlayState, Source, UIState } from '@recorder/recorderTypes';
+import type * as channels from '@playwright/protocol/src/channels';
+import type { CallLog, CallLogStatus, ElementInfo, EventData, Mode, OverlayState, Source, UIState } from '@playwright/recorder-types/src/recorderTypes';
 import * as fs from 'fs';
 import type { Point } from '../common/types';
 import * as consoleApiSource from '../generated/consoleApiSource';
@@ -28,11 +28,11 @@ import type { CallMetadata, InstrumentationListener, SdkObject } from './instrum
 import { ContextRecorder, generateFrameSelector } from './recorder/contextRecorder';
 import type { IRecorderAppFactory, IRecorderApp, IRecorder } from './recorder/recorderFrontend';
 import { metadataToCallLog } from './recorder/recorderUtils';
-import type * as actions from '@recorder/actions';
+import type * as actions from '@playwright/recorder-types/src/actions';
 import { buildFullSelector } from '../utils/isomorphic/recorderUtils';
 import { stringifySelector } from '../utils/isomorphic/selectorParser';
 import type { Frame } from './frames';
-import type { ParsedYaml } from '@isomorphic/ariaSnapshot';
+import type { ParsedYaml } from '../utils/isomorphic/ariaSnapshot';
 
 const recorderSymbol = Symbol('recorderSymbol');
 

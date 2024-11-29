@@ -14,18 +14,18 @@
   limitations under the License.
 */
 
-import type { ActionTraceEvent, AfterActionTraceEventAttachment } from '@trace/trace';
-import { msToString } from '@web/uiUtils';
+import type { ActionTraceEvent, AfterActionTraceEventAttachment } from '@playwright/trace/src/trace';
+import { msToString } from '@playwright/web/src/uiUtils';
 import * as React from 'react';
 import './actionList.css';
 import * as modelUtil from './modelUtil';
 import { asLocator } from '@isomorphic/locatorGenerators';
 import type { Language } from '@isomorphic/locatorGenerators';
-import type { TreeState } from '@web/components/treeView';
-import { TreeView } from '@web/components/treeView';
+import type { TreeState } from '@playwright/web/src/components/treeView';
+import { TreeView } from '@playwright/web/src/components/treeView';
 import type { ActionTraceEventInContext, ActionTreeItem } from './modelUtil';
 import type { Boundaries } from './geometry';
-import { ToolbarButton } from '@web/components/toolbarButton';
+import { ToolbarButton } from '@playwright/web/src/components/toolbarButton';
 
 export interface ActionListProps {
   actions: ActionTraceEventInContext[],

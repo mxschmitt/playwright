@@ -16,13 +16,10 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@injected/*": ["../playwright-core/src/server/injected/*"],
       "@isomorphic/*": ["../playwright-core/src/utils/isomorphic/*"],
-      "@protocol/*": ["../protocol/src/*"],
-      "@recorder/*": ["../recorder/src/*"],
-      "@testIsomorphic/*": ["../playwright/src/isomorphic/*"],
+      "@injected/*": ["../playwright-core/src/server/injected/*"],
+      "@testIsomorphic/*": ["../playwright/src/@isomorphic/*"],
       "@trace/*": ["../trace/src/*"],
-      "@web/*": ["../web/src/*"],
       // Resolving type dependencies will start processing types in @playwright/test
       // which in turn will start parsing the files and hence stumble upon the core
       // imports.
@@ -31,5 +28,8 @@
     "useUnknownInCatchVariables": false,
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "../playwright-core" },
+  ]
 }

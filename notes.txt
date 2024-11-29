@@ -1,0 +1,14 @@
+Thoughts:
+- Instead of using tsconfig `paths` I leveraged monorepo package names to resolve imports
+- I had to split up some recorder / pw-core imports to avoid circular dependencies
+  - Known upstream issue: https://github.com/microsoft/TypeScript/issues/33685
+- We need to move bundles into devDependencies of the packages we ship so that TSC can find its types (maybe we can workaround it)
+- d.ts files are getting emitted - we can't strip them out with `declaration: false` in the tsconfig (required for composite projects)
+
+Motivation:
+- Simplifies build process and would allow us from going from multiple babel processes to a single TSC process during our build.
+- This also solves the problem that we have two different AST parsers in our build process (Babel and TSC). (I remember an issue where Babel was throwing something and TSC didn't)
+
+
+Key takeaways:
+- Migrating away from tsconfig paths is a good idea, seems to simplify things unrelated to the tsconfig package reference adoption

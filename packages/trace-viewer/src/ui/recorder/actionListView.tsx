@@ -14,8 +14,8 @@
   limitations under the License.
 */
 
-import type * as actionTypes from '@recorder/actions';
-import { ListView } from '@web/components/listView';
+import type * as actionTypes from '@playwright/recorder-types/src/actions';
+import { ListView } from '@playwright/web/src/components/listView';
 import * as React from 'react';
 import '../actionList.css';
 import { traceParamsForAction } from '@isomorphic/recorderUtils';

@@ -67,9 +67,9 @@ export abstract class AsymmetricMatcher<T>
 implements AsymmetricMatcherInterface {
   $$typeof = Symbol.for('jest.asymmetricMatcher');
 
-  constructor(protected sample: T, protected inverse = false) { }
+  constructor(public sample: T, public inverse = false) { }
 
-  protected getMatcherContext(): MatcherContext {
+  public getMatcherContext(): MatcherContext {
     return {
       customTesters: getCustomEqualityTesters(),
 
@@ -290,7 +290,7 @@ class StringMatching extends AsymmetricMatcher<RegExp> {
 }
 
 class CloseTo extends AsymmetricMatcher<number> {
-  private readonly precision: number;
+  public readonly precision: number;
 
   constructor(sample: number, precision = 2, inverse = false) {
     if (!isA('Number', sample))

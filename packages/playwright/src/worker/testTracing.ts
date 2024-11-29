@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { SerializedError, StackFrame } from '@protocol/channels';
-import type * as trace from '@trace/trace';
+import type { SerializedError, StackFrame } from '@playwright/protocol/src/channels';
+import type * as trace from '@playwright/trace/src/trace';
 import type EventEmitter from 'events';
 import fs from 'fs';
 import path from 'path';

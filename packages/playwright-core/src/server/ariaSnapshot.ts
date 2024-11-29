@@ -15,7 +15,7 @@
  */
 
 import { parseYamlTemplate } from '../utils/isomorphic/ariaSnapshot';
-import type { AriaTemplateNode, ParsedYaml } from '@isomorphic/ariaSnapshot';
+import type { AriaTemplateNode, ParsedYaml } from '../utils/isomorphic/ariaSnapshot';
 import { yaml } from '../utilsBundle';
 
 export function parseAriaSnapshot(text: string): AriaTemplateNode {

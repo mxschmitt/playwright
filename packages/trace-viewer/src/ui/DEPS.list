@@ -2,8 +2,8 @@
 @injected/**
 @isomorphic/**
 @trace/**
-@web/**
+@playwright/web/src/**
 ../entries.ts
 ../geometry.ts
-../../../playwright/src/isomorphic/**
+../../../playwright/src/@isomorphic/**
 ../third_party/devtools.ts

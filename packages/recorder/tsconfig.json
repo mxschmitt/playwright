@@ -12,17 +12,17 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
+    "composite": true,
     "useUnknownInCatchVariables": false,
     "paths": {
       "@isomorphic/*": ["../playwright-core/src/utils/isomorphic/*"],
-      "@protocol/*": ["../protocol/src/*"],
-      "@recorder/*": ["../recorder/src/*"],
-      "@web/*": ["../web/src/*"],
-    }
+    },
   },
+  "references": [
+    { "path": "../playwright-core" },
+    { "path": "../recorder-types" }
+  ],
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
 }

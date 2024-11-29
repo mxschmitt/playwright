@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type * as actions from '@recorder/actions';
-import type { CallLog, Mode, Source, ElementInfo } from '@recorder/recorderTypes';
+import type * as actions from '@playwright/recorder-types/src/actions';
+import type { CallLog, Mode, Source, ElementInfo } from '@playwright/recorder-types/src/recorderTypes';
 import type { EventEmitter } from 'events';
 
 export interface IRecorder {

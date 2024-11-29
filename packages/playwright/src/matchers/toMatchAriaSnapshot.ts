@@ -23,7 +23,7 @@ import { EXPECTED_COLOR } from '../common/expectBundle';
 import { callLogText } from '../util';
 import { printReceivedStringContainExpectedSubstring } from './expect';
 import { currentTestInfo } from '../common/globals';
-import type { MatcherReceived } from '@injected/ariaSnapshot';
+import type { MatcherReceived } from 'playwright-core/lib/server/injected/ariaSnapshot';
 import { escapeTemplateString } from 'playwright-core/lib/utils';
 
 export async function toMatchAriaSnapshot(

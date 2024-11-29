@@ -17,13 +17,13 @@
 import { EventEmitter } from 'events';
 import type { Frame } from '../frames';
 import type { Page } from '../page';
-import type { Signal } from '../../../../recorder/src/actions';
-import type * as actions from '@recorder/actions';
+import type { Signal } from '@playwright/recorder-types/src/actions';
+import type * as actions from '@playwright/recorder-types/src/actions';
 import { monotonicTime } from '../../utils/time';
 import { callMetadataForAction, collapseActions } from './recorderUtils';
 import { serializeError } from '../errors';
 import { performAction } from './recorderRunner';
-import type { CallMetadata } from '@protocol/callMetadata';
+import type { CallMetadata } from '@playwright/protocol/src/callMetadata';
 import { isUnderTest } from '../../utils/debug';
 
 export class RecorderCollection extends EventEmitter {

@@ -1,7 +1,7 @@
 [*]
 @isomorphic/**
 @trace/**
-@web/**
+@playwright/web/src/**
 ui/
 
 [sw-main.ts]

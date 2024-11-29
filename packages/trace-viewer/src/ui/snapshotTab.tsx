@@ -16,20 +16,20 @@
 
 import './snapshotTab.css';
 import * as React from 'react';
-import type { ActionTraceEvent } from '@trace/trace';
+import type { ActionTraceEvent } from '@playwright/trace/src/trace';
 import { context, type MultiTraceModel, prevInList } from './modelUtil';
-import { Toolbar } from '@web/components/toolbar';
-import { ToolbarButton } from '@web/components/toolbarButton';
-import { clsx, useMeasure } from '@web/uiUtils';
+import { Toolbar } from '@playwright/web/src/components/toolbar';
+import { ToolbarButton } from '@playwright/web/src/components/toolbarButton';
+import { clsx, useMeasure } from '@playwright/web/src/uiUtils';
 import { InjectedScript } from '@injected/injectedScript';
 import { Recorder } from '@injected/recorder/recorder';
 import ConsoleAPI from '@injected/consoleApi';
 import { asLocator } from '@isomorphic/locatorGenerators';
 import type { Language } from '@isomorphic/locatorGenerators';
 import { locatorOrSelectorAsSelector } from '@isomorphic/locatorParser';
-import { TabbedPaneTab } from '@web/components/tabbedPane';
+import { TabbedPaneTab } from '@playwright/web/src/components/tabbedPane';
 import { BrowserFrame } from './browserFrame';
-import type { ElementInfo } from '@recorder/recorderTypes';
+import type { ElementInfo } from '@playwright/recorder-types/src/recorderTypes';
 
 export const SnapshotTabsView: React.FunctionComponent<{
   action: ActionTraceEvent | undefined,

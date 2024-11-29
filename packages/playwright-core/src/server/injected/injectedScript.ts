@@ -27,7 +27,7 @@ import { SelectorEvaluatorImpl, sortInDOMOrder } from './selectorEvaluator';
 import { enclosingShadowRootOrDocument, isElementVisible, isInsideScope, parentElementOrShadowHost, setBrowserName } from './domUtils';
 import type { CSSComplexSelectorList } from '../../utils/isomorphic/cssParser';
 import { generateSelector, type GenerateSelectorOptions } from './selectorGenerator';
-import type * as channels from '@protocol/channels';
+import type * as channels from '@playwright/protocol/src/channels';
 import { Highlight } from './highlight';
 import { getChecked, getAriaDisabled, getAriaRole, getElementAccessibleName, getElementAccessibleDescription, getReadonly } from './roleUtils';
 import { kLayoutSelectorNames, type LayoutSelectorName, layoutSelectorScore } from './layoutSelectorUtils';
@@ -36,8 +36,8 @@ import type { Language } from '../../utils/isomorphic/locatorGenerators';
 import { cacheNormalizedWhitespaces, normalizeWhiteSpace, trimStringWithEllipsis } from '../../utils/isomorphic/stringUtils';
 import { matchesAriaTree, getAllByAria, generateAriaTree, renderAriaTree } from './ariaSnapshot';
 import type { AriaNode, AriaSnapshot } from './ariaSnapshot';
-import type { AriaTemplateNode } from '@isomorphic/ariaSnapshot';
-import { parseYamlTemplate } from '@isomorphic/ariaSnapshot';
+import type { AriaTemplateNode } from '../../utils/isomorphic/ariaSnapshot';
+import { parseYamlTemplate } from '../../utils/isomorphic/ariaSnapshot';
 
 export type FrameExpectParams = Omit<channels.FrameExpectParams, 'expectedValue'> & { expectedValue?: any };
 

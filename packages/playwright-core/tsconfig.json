@@ -1,0 +1,16 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "lib",
+        "rootDir": "src",
+        "composite": true,
+    },
+    "references": [
+        { "path": "../recorder-types" },
+        { "path": "../protocol" }
+    ],
+    "include": [
+        "src/**/*", 
+        "src/**/*.json",
+    ]
+}

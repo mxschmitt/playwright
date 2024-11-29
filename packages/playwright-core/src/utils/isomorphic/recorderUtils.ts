@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type * as recorderActions from '@recorder/actions';
-import type * as channels from '@protocol/channels';
+import type * as recorderActions from '@playwright/recorder-types/src/actions';
+import type * as channels from '@playwright/protocol/src/channels';
 import type * as types from '../../server/types';
 
 export function buildFullSelector(framePath: string[], selector: string) {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { escapeHTMLAttribute, escapeHTML } from '@isomorphic/stringUtils';
-import type { FrameSnapshot, NodeNameAttributesChildNodesSnapshot, NodeSnapshot, RenderedFrameSnapshot, ResourceSnapshot, SubtreeReferenceSnapshot } from '@trace/snapshot';
+import { escapeHTMLAttribute, escapeHTML } from '../../../playwright-core/src/utils/isomorphic/stringUtils';
+import type { FrameSnapshot, NodeNameAttributesChildNodesSnapshot, NodeSnapshot, RenderedFrameSnapshot, ResourceSnapshot, SubtreeReferenceSnapshot } from '@playwright/trace/src/snapshot';
 import type { PageEntry } from '../types/entries';
 import type { LRUCache } from './lruCache';
 

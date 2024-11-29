@@ -14,8 +14,10 @@
   limitations under the License.
 */
 
-import type { Language } from '../../playwright-core/src/utils/isomorphic/locatorGenerators';
-import type { ParsedYaml } from '@isomorphic/ariaSnapshot';
+// TODO fix circular reference
+export type Language = 'javascript' | 'python' | 'java' | 'csharp' | 'jsonl';
+export type ParsedYaml = Array<any>;
+
 
 export type Point = { x: number; y: number };
 

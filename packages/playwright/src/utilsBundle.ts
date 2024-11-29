@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export const json5: typeof import('../bundles/utils/node_modules/json5/lib') = require('./utilsBundleImpl').json5;
-export const pirates: typeof import('../bundles/utils/node_modules/pirates') = require('./utilsBundleImpl').pirates;
-export const sourceMapSupport: typeof import('../bundles/utils/node_modules/@types/source-map-support') = require('./utilsBundleImpl').sourceMapSupport;
-export const stoppable: typeof import('../bundles/utils/node_modules/@types/stoppable') = require('./utilsBundleImpl').stoppable;
-export const enquirer: typeof import('../bundles/utils/node_modules/enquirer') = require('./utilsBundleImpl').enquirer;
-export const chokidar: typeof import('../bundles/utils/node_modules/chokidar') = require('./utilsBundleImpl').chokidar;
-export const getEastAsianWidth: typeof import('../bundles/utils/node_modules/get-east-asian-width') = require('./utilsBundleImpl').getEastAsianWidth;
-export type { RawSourceMap } from '../bundles/utils/node_modules/source-map';
+export const json5: typeof import('json5/lib') = require('./utilsBundleImpl').json5;
+export const pirates: typeof import('pirates') = require('./utilsBundleImpl').pirates;
+export const sourceMapSupport: typeof import('source-map-support') = require('./utilsBundleImpl').sourceMapSupport;
+export const stoppable: typeof import('stoppable') = require('./utilsBundleImpl').stoppable;
+export const enquirer: typeof import('enquirer') = require('./utilsBundleImpl').enquirer;
+export const chokidar: typeof import('chokidar') = require('./utilsBundleImpl').chokidar;
+export const getEastAsianWidth: typeof import('get-east-asian-width') = require('./utilsBundleImpl').getEastAsianWidth;
+export type { RawSourceMap } from 'source-map';

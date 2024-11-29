@@ -241,24 +241,24 @@ steps.push({
 });
 
 // Run Babel.
-for (const pkg of workspace.packages()) {
-  if (!fs.existsSync(path.join(pkg.path, 'src')))
-    continue;
-  steps.push({
-    command: 'npx',
-    args: [
-      'babel',
-      ...(watchMode ? ['-w'] : []),
-      ...(withSourceMaps ? ['--source-maps'] : []),
-      '--extensions', '.ts',
-      '--out-dir', quotePath(path.join(pkg.path, 'lib')),
-      '--ignore', '"packages/playwright-core/src/server/injected/**/*"',
-      quotePath(path.join(pkg.path, 'src')),
-    ],
-    shell: true,
-    concurrent: true,
-  });
-}
+// for (const pkg of workspace.packages()) {
+//   if (!fs.existsSync(path.join(pkg.path, 'src')))
+//     continue;
+//   steps.push({
+//     command: 'npx',
+//     args: [
+//       'babel',
+//       ...(watchMode ? ['-w'] : []),
+//       ...(withSourceMaps ? ['--source-maps'] : []),
+//       '--extensions', '.ts',
+//       '--out-dir', quotePath(path.join(pkg.path, 'lib')),
+//       '--ignore', '"packages/playwright-core/src/server/injected/**/*"',
+//       quotePath(path.join(pkg.path, 'src')),
+//     ],
+//     shell: true,
+//     concurrent: true,
+//   });
+// }
 
 // Build/watch bundles.
 for (const bundle of bundles) {

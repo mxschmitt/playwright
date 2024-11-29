@@ -19,7 +19,9 @@ import type { ParsedSelector } from '../../utils/isomorphic/selectorParser';
 import type { InjectedScript } from './injectedScript';
 import { asLocator } from '../../utils/isomorphic/locatorGenerators';
 import type { Language } from '../../utils/isomorphic/locatorGenerators';
+// @ts-ignore
 import highlightCSS from './highlight.css?inline';
+
 
 type HighlightEntry = {
   targetElement: Element,

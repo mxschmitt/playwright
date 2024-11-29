@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { AriaRole } from '@isomorphic/ariaSnapshot';
+import type { AriaRole } from '../../utils/isomorphic/ariaSnapshot';
 import { closestCrossShadow, elementSafeTagName, enclosingShadowRootOrDocument, getElementComputedStyle, isElementStyleVisibilityVisible, isVisibleTextNode, parentElementOrShadowHost } from './domUtils';
 
 function hasExplicitAccessibleName(e: Element) {

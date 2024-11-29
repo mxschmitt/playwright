@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { Entry } from '@trace/har';
+import type { Entry } from '@playwright/trace/src/har';
 import * as React from 'react';
 import type { Boundaries } from './geometry';
 import './networkTab.css';
 import { NetworkResourceDetails } from './networkResourceDetails';
-import { bytesToString, msToString } from '@web/uiUtils';
+import { bytesToString, msToString } from '@playwright/web/src/uiUtils';
 import { PlaceholderPanel } from './placeholderPanel';
 import { context, type MultiTraceModel } from './modelUtil';
-import { GridView, type RenderedGridCell } from '@web/components/gridView';
-import { SplitView } from '@web/components/splitView';
+import { GridView, type RenderedGridCell } from '@playwright/web/src/components/gridView';
+import { SplitView } from '@playwright/web/src/components/splitView';
 import type { ContextEntry } from '../types/entries';
 import { NetworkFilters, defaultFilterState, type FilterState, type ResourceType } from './networkFilters';
 import type { Language } from '@isomorphic/locatorGenerators';

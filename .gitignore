@@ -3,6 +3,7 @@ node_modules/
 /tests/coverage-report
 .local-browsers/
 /.dev_profile*
+tsconfig.tsbuildinfo
 .DS_Store
 *.swp
 *.pyc

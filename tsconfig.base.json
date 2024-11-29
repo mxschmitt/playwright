@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "commonjs",
+    "lib": ["esnext", "dom", "DOM.Iterable"],
+    "paths": {
+      /*
+        The following two serve different purposes:
+         - @foo/* is for importing types only,
+         - .../lib/* means require dependency
+      */
+      "@injected/*": ["./packages/playwright-core/src/server/injected/*"],
+      "@isomorphic/*": ["./packages/@isomorphic/*"],
+      "@testIsomorphic/*": ["./packages/playwright/src/@isomorphic/*"],
+      "playwright-core/lib/*": ["./packages/playwright-core/src/*"],
+      "playwright/lib/*": ["./packages/playwright/src/*"],
+    },
+    "esModuleInterop": true,
+    "strict": true,
+    "allowJs": false,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "noImplicitOverride": true,
+    "useUnknownInCatchVariables": false,
+    "skipLibCheck": true,
+    "noImplicitAny": true
+  },
+}

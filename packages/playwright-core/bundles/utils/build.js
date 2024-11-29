@@ -26,7 +26,7 @@ if (!fs.existsSync(outdir))
 
 {
   // 'open' package requires 'xdg-open' binary to be present, which does not get bundled by esbuild.
-  fs.copyFileSync(path.join(__dirname, 'node_modules/open/xdg-open'), path.join(outdir, 'xdg-open'));
+  fs.copyFileSync(require.resolve('open/xdg-open'), path.join(outdir, 'xdg-open'));
 }
 
 (async () => {
