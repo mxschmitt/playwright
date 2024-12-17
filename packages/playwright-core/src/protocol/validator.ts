@@ -420,6 +420,9 @@ scheme.DebugControllerNavigateResult = tOptional(tObject({}));
 scheme.DebugControllerSetRecorderModeParams = tObject({
   mode: tEnum(['inspecting', 'recording', 'none']),
   testIdAttributeName: tOptional(tString),
+  browserName: tOptional(tEnum(['chromium', 'firefox', 'webkit'])),
+  contextOptions: tOptional(tType('BrowserNewContextForReuseParams')),
+  launchOptions: tOptional(tType('BrowserTypeLaunchParams')),
 });
 scheme.DebugControllerSetRecorderModeResult = tOptional(tObject({}));
 scheme.DebugControllerHighlightParams = tObject({

@@ -30,6 +30,7 @@ import { DebugController } from './debugController';
 import type { BrowserType } from './browserType';
 import { BidiChromium } from './bidi/bidiChromium';
 import { BidiFirefox } from './bidi/bidiFirefox';
+import type { LaunchOptions } from './types';
 
 type PlaywrightOptions = {
   socksProxyPort?: number;
@@ -87,6 +88,40 @@ export class Playwright extends SdkObject {
   allPages(): Page[] {
     return [...this._allPages];
   }
+
+  findBrowserWithMatchingOptions(requestedBrowserName: string | null, requestedOptions: LaunchOptions): Browser | undefined {
+    return this.allBrowsers().find(b => {
+      if (b.options.name !== (requestedBrowserName ?? 'chromium'))
+        return false;
+      return launchOptionsHash(b.options.originalLaunchOptions) === launchOptionsHash(requestedOptions);
+    });
+  }
+}
+
+const defaultLaunchOptions: LaunchOptions = {
+  ignoreAllDefaultArgs: false,
+  handleSIGINT: false,
+  handleSIGTERM: false,
+  handleSIGHUP: false,
+  headless: true,
+  devtools: false,
+};
+
+const optionsThatAllowBrowserReuse: (keyof LaunchOptions)[] = [
+  'headless',
+  'tracesDir',
+];
+
+function launchOptionsHash(options: LaunchOptions) {
+  const copy = { ...options };
+  for (const k of Object.keys(copy)) {
+    const key = k as keyof LaunchOptions;
+    if (copy[key] === defaultLaunchOptions[key])
+      delete copy[key];
+  }
+  for (const key of optionsThatAllowBrowserReuse)
+    delete copy[key];
+  return JSON.stringify(copy);
 }
 
 export function createPlaywright(options: PlaywrightOptions) {
