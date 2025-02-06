@@ -29,15 +29,9 @@ export type DownloadParams = {
   executablePath: string | undefined;
   connectionTimeout: number;
   userAgent: string;
+  progress: (downloadedBytes: number, totalBytes: number) => void
+  log(message: string): void;
 };
-
-function log(message: string) {
-  process.send?.({ method: 'log', params: { message } });
-}
-
-function progress(done: number, total: number) {
-  process.send?.({ method: 'progress', params: { done, total } });
-}
 
 function browserDirectoryToMarkerFilePath(browserDirectory: string): string {
   return path.join(browserDirectory, 'INSTALLATION_COMPLETE');
@@ -56,7 +50,7 @@ function downloadFile(options: DownloadParams): Promise<void> {
     },
     timeout: options.connectionTimeout,
   }, response => {
-    log(`-- response status code: ${response.statusCode}`);
+    options.log(`-- response status code: ${response.statusCode}`);
     if (response.statusCode !== 200) {
       let content = '';
       const handleError = () => {
@@ -72,14 +66,14 @@ function downloadFile(options: DownloadParams): Promise<void> {
       return;
     }
     totalBytes = parseInt(response.headers['content-length'] || '0', 10);
-    log(`-- total bytes: ${totalBytes}`);
+    options.log(`-- total bytes: ${totalBytes}`);
     const file = fs.createWriteStream(options.zipPath);
     file.on('finish', () => {
       if (downloadedBytes !== totalBytes) {
-        log(`-- download failed, size mismatch: ${downloadedBytes} != ${totalBytes}`);
+        options.log(`-- download failed, size mismatch: ${downloadedBytes} != ${totalBytes}`);
         promise.reject(new Error(`Download failed: size mismatch, file size: ${downloadedBytes}, expected size: ${totalBytes} URL: ${options.url}`));
       } else {
-        log(`-- download complete, size: ${downloadedBytes}`);
+        options.log(`-- download complete, size: ${downloadedBytes}`);
         promise.resolve();
       }
     });
@@ -89,10 +83,10 @@ function downloadFile(options: DownloadParams): Promise<void> {
     response.on('error', (error: any) => {
       file.close();
       if (error?.code === 'ECONNRESET') {
-        log(`-- download failed, server closed connection`);
+        options.log(`-- download failed, server closed connection`);
         promise.reject(new Error(`Download failed: server closed connection. URL: ${options.url}`));
       } else {
-        log(`-- download failed, unexpected error`);
+        options.log(`-- download failed, unexpected error`);
         promise.reject(new Error(`Download failed: ${error?.message ?? error}. URL: ${options.url}`));
       }
     });
@@ -101,37 +95,18 @@ function downloadFile(options: DownloadParams): Promise<void> {
 
   function onData(chunk: string) {
     downloadedBytes += chunk.length;
-    progress(downloadedBytes, totalBytes);
+    options.progress(downloadedBytes, totalBytes);
   }
 }
 
-async function main(options: DownloadParams) {
+export async function downloadBrowser(options: DownloadParams) {
   await downloadFile(options);
-  log(`SUCCESS downloading ${options.title}`);
-  log(`extracting archive`);
+  options.log(`SUCCESS downloading ${options.title}`);
+  options.log(`extracting archive`);
   await extract(options.zipPath, { dir: options.browserDirectory });
   if (options.executablePath) {
-    log(`fixing permissions at ${options.executablePath}`);
+    options.log(`fixing permissions at ${options.executablePath}`);
     await fs.promises.chmod(options.executablePath, 0o755);
   }
   await fs.promises.writeFile(browserDirectoryToMarkerFilePath(options.browserDirectory), '');
 }
-
-process.on('message', async message => {
-  const { method, params } = message as any;
-  if (method === 'download') {
-    try {
-      await main(params);
-      // eslint-disable-next-line no-restricted-properties
-      process.exit(0);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
-      // eslint-disable-next-line no-restricted-properties
-      process.exit(1);
-    }
-  }
-});
-
-// eslint-disable-next-line no-restricted-properties
-process.on('disconnect', () => { process.exit(0); });
