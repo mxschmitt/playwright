@@ -1,0 +1,49 @@
+diff --git a/node_modules/extract-zip/index.d.ts b/node_modules/extract-zip/index.d.ts
+index 6dbcc80..91a1a21 100644
+--- a/node_modules/extract-zip/index.d.ts
++++ b/node_modules/extract-zip/index.d.ts
+@@ -14,7 +14,7 @@ declare namespace extract {
+ }
+ 
+ declare function extract(
+-  zipPath: string,
++  zipPath: string | Buffer,
+   opts: extract.Options,
+ ): Promise<void>;
+ 
+diff --git a/node_modules/extract-zip/index.js b/node_modules/extract-zip/index.js
+index 23384ea..77754b4 100644
+--- a/node_modules/extract-zip/index.js
++++ b/node_modules/extract-zip/index.js
+@@ -8,6 +8,7 @@ const stream = require('stream')
+ const yauzl = require('yauzl')
+ 
+ const openZip = promisify(yauzl.open)
++const openBuffer = promisify(yauzl.fromBuffer)
+ const pipeline = promisify(stream.pipeline)
+ 
+ class Extractor {
+@@ -19,7 +20,7 @@ class Extractor {
+   async extract () {
+     debug('opening', this.zipPath, 'with opts', this.opts)
+ 
+-    this.zipfile = await openZip(this.zipPath, { lazyEntries: true })
++    this.zipfile = await (typeof this.zipPath === 'string' ? openZip : openBuffer)(this.zipPath, { lazyEntries: true })
+     this.canceled = false
+ 
+     return new Promise((resolve, reject) => {
+@@ -29,11 +30,9 @@ class Extractor {
+       })
+       this.zipfile.readEntry()
+ 
+-      this.zipfile.on('close', () => {
+-        if (!this.canceled) {
+-          debug('zip extraction complete')
+-          resolve()
+-        }
++      this.zipfile.on('end', () => {
++        debug('zip extraction complete')
++        resolve()
+       })
+ 
+       this.zipfile.on('entry', async entry => {

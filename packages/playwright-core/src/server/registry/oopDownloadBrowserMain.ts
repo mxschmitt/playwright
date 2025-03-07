@@ -25,7 +25,6 @@ export type DownloadParams = {
   title: string;
   browserDirectory: string;
   url: string;
-  zipPath: string;
   executablePath: string | undefined;
   connectionTimeout: number;
   userAgent: string;
@@ -43,12 +42,11 @@ function browserDirectoryToMarkerFilePath(browserDirectory: string): string {
   return path.join(browserDirectory, 'INSTALLATION_COMPLETE');
 }
 
-function downloadFile(options: DownloadParams): Promise<void> {
+function downloadFile(options: DownloadParams): Promise<Buffer> {
   let downloadedBytes = 0;
   let totalBytes = 0;
 
-  const promise = new ManualPromise<void>();
-
+  const promise = new ManualPromise<Buffer>();
   httpRequest({
     url: options.url,
     headers: {
@@ -73,21 +71,22 @@ function downloadFile(options: DownloadParams): Promise<void> {
     }
     totalBytes = parseInt(response.headers['content-length'] || '0', 10);
     log(`-- total bytes: ${totalBytes}`);
-    const file = fs.createWriteStream(options.zipPath);
-    file.on('finish', () => {
+    const chunks: Uint8Array[] = [];
+    response.on('end', () => {
       if (downloadedBytes !== totalBytes) {
         log(`-- download failed, size mismatch: ${downloadedBytes} != ${totalBytes}`);
         promise.reject(new Error(`Download failed: size mismatch, file size: ${downloadedBytes}, expected size: ${totalBytes} URL: ${options.url}`));
       } else {
         log(`-- download complete, size: ${downloadedBytes}`);
-        promise.resolve();
+        promise.resolve(Buffer.concat(chunks));
       }
     });
-    file.on('error', error => promise.reject(error));
-    response.pipe(file);
-    response.on('data', onData);
+    response.on('data', (chunk: Uint8Array) => {
+      downloadedBytes += chunk.length;
+      chunks.push(chunk);
+      progress(downloadedBytes, totalBytes);
+    });
     response.on('error', (error: any) => {
-      file.close();
       if (error?.code === 'ECONNRESET') {
         log(`-- download failed, server closed connection`);
         promise.reject(new Error(`Download failed: server closed connection. URL: ${options.url}`));
@@ -98,18 +97,14 @@ function downloadFile(options: DownloadParams): Promise<void> {
     });
   }, (error: any) => promise.reject(error));
   return promise;
-
-  function onData(chunk: string) {
-    downloadedBytes += chunk.length;
-    progress(downloadedBytes, totalBytes);
-  }
 }
 
 async function main(options: DownloadParams) {
-  await downloadFile(options);
+  const zipFile = await downloadFile(options);
   log(`SUCCESS downloading ${options.title}`);
   log(`extracting archive`);
-  await extract(options.zipPath, { dir: options.browserDirectory });
+  await fs.writeFileSync('/Users/maxschmitt/Developer/playwright/packages/playwright-core/src/server/registry/oopDownloadBrowserMain.zip', zipFile);
+  await extract(zipFile, { dir: options.browserDirectory });
   if (options.executablePath) {
     log(`fixing permissions at ${options.executablePath}`);
     await fs.promises.chmod(options.executablePath, 0o755);
