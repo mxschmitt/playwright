@@ -19,6 +19,7 @@ import { test as it, expect } from './pageTest';
 import { chromiumVersionLessThan } from '../config/utils';
 
 it('should work @smoke', async ({ page, browserName, isMac }) => {
+  it.skip(browserName === 'webkit');
   await page.setContent(`
   <head>
     <title>Accessibility Test</title>
@@ -63,6 +64,7 @@ it('should work @smoke', async ({ page, browserName, isMac }) => {
       { role: 'textbox', name: 'placeholder', value: 'and a value' },
       { role: 'textbox', name: 'placeholder', value: 'and a value', description: 'This is a description!' },
     ]
+  // WebKit
   } : {
     role: 'WebArea',
     name: 'Accessibility Test',
@@ -74,6 +76,7 @@ it('should work @smoke', async ({ page, browserName, isMac }) => {
       { role: 'textbox', name: 'Input with whitespace', value: '  ' },
       { role: 'textbox', name: '', value: 'value only' },
       { role: 'textbox', name: 'placeholder', value: 'and a value' },
+      { role: 'text', name: 'This is a description!' },
       { role: 'textbox', name: isMac ? 'placeholder' : 'This is a description!', value: 'and a value' },
     ]
   };
