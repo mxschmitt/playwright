@@ -1442,31 +1442,42 @@ export class InjectedScript {
       return { received, matches };
     }
 
-    // List of values.
-    let received: string[] | undefined;
+    // Following matchers depend all on ExpectedTextValue.
+    if (!options.expectedText)
+      throw this.createStacklessError('Expected text is not provided for ' + expression);
+
+    let received: string[];
     if (expression === 'to.have.text.array' || expression === 'to.contain.text.array')
       received = elements.map(e => options.useInnerText ? (e as HTMLElement).innerText : elementText(new Map(), e).full);
     else if (expression === 'to.have.class.array')
       received = elements.map(e => e.classList.toString());
+    else
+      throw this.createStacklessError('Unknown expect matcher: ' + expression);
 
-    if (received && options.expectedText) {
-      // "To match an array" is "to contain an array" + "equal length"
-      const lengthShouldMatch = expression !== 'to.contain.text.array';
-      const matchesLength = received.length === options.expectedText.length || !lengthShouldMatch;
-      if (!matchesLength)
-        return { received, matches: false };
+    // "To match an array" is "to contain an array" + "equal length"
+    const lengthShouldMatch = expression !== 'to.contain.text.array';
+    const matchesLength = received.length === options.expectedText.length || !lengthShouldMatch;
+    if (!matchesLength)
+      return { received, matches: false };
 
-      // Each matcher should get a "received" that matches it, in order.
-      const matchers = options.expectedText.map(e => new ExpectedTextMatcher(e));
-      let mIndex = 0, rIndex = 0;
-      while (mIndex < matchers.length && rIndex < received.length) {
-        if (matchers[mIndex].matches(received[rIndex]))
-          ++mIndex;
-        ++rIndex;
-      }
-      return { received, matches: mIndex === matchers.length };
+    const matches = this._matchSequentially(options.expectedText, received, (matcher, r) => matcher.matches(r));
+    return { received, matches };
+  }
+
+  private _matchSequentially<T>(
+    expectedText: channels.ExpectedTextValue[],
+    received: T[],
+    matchFn: (matcher: ExpectedTextMatcher, received: T) => boolean
+  ): boolean {
+    const matchers = expectedText.map(e => new ExpectedTextMatcher(e));
+    let mIndex = 0;
+    let rIndex = 0;
+    while (mIndex < matchers.length && rIndex < received.length) {
+      if (matchFn(matchers[mIndex], received[rIndex]))
+        ++mIndex;
+      ++rIndex;
     }
-    throw this.createStacklessError('Unknown expect matcher: ' + expression);
+    return mIndex === matchers.length;
   }
 }
 
