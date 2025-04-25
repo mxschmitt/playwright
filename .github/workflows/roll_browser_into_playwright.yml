@@ -22,6 +22,9 @@ env:
 permissions:
   contents: write
 
+concurrency: 
+  group: 'roll-browser-into-playwright-${{ github.event.client_payload.browser || github.event.inputs.browser }}-${{ github.event.client_payload.revision || github.event.inputs.revision }}'
+
 jobs:
   roll:
     runs-on: ubuntu-24.04
@@ -42,6 +45,11 @@ jobs:
       id: prepare-branch
       run: |
         BRANCH_NAME="roll-into-pw-${BROWSER}/${REVISION}"
+        if git show-ref --verify --quiet refs/heads/$BRANCH_NAME; then
+          echo "branch $BRANCH_NAME already exists, exiting"
+          exit 0
+        fi
+
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
         git config --global user.name microsoft-playwright-automation[bot]
         git config --global user.email 203992400+microsoft-playwright-automation[bot]@users.noreply.github.com
