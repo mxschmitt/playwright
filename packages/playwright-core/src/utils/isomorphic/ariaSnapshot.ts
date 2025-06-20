@@ -54,13 +54,7 @@ export type AriaTemplateNode = AriaTemplateRoleNode | AriaTemplateTextNode;
 
 import type * as yamlTypes from 'yaml';
 
-type YamlLibrary = {
-  parseDocument: typeof yamlTypes.parseDocument;
-  Scalar: typeof yamlTypes.Scalar;
-  YAMLMap: typeof yamlTypes.YAMLMap;
-  YAMLSeq: typeof yamlTypes.YAMLSeq;
-  LineCounter: typeof yamlTypes.LineCounter;
-};
+type YamlLibrary = typeof import('yaml');
 
 type ParsedYamlPosition = { line: number; col: number; };
 
