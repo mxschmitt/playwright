@@ -29,7 +29,8 @@ export class Filter {
   annotations: FilterToken[] = [];
 
   empty(): boolean {
-    return this.project.length + this.status.length + this.text.length === 0;
+    return this.project.length + this.status.length + this.text.length +
+        this.labels.length + this.annotations.length === 0;
   }
 
   static parse(expression: string): Filter {
@@ -215,7 +216,7 @@ export function filterWithToken(tokens: string[], token: string, append: boolean
   }
 
   // if metaKey or ctrlKey is not pressed, replace existing token with new token
-  let prefix: 's:' | 'p:' | '@';
+  let prefix: string | undefined;
   if (token.startsWith('s:'))
     prefix = 's:';
   if (token.startsWith('p:'))
@@ -223,6 +224,8 @@ export function filterWithToken(tokens: string[], token: string, append: boolean
   if (token.startsWith('@'))
     prefix = '@';
 
+  if (!prefix)
+    prefix = token;
   const newTokens = tokens.filter(t => !t.startsWith(prefix));
   newTokens.push(token);
   return '#?q=' + newTokens.join(' ').trim();
