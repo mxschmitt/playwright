@@ -729,11 +729,7 @@ export interface Project<TestArgs = {}, WorkerArgs = {}> extends TestProject<Tes
 }
 
 /**
- * Runtime representation of the test project configuration. It is accessible in the tests via
- * [testInfo.project](https://playwright.dev/docs/api/class-testinfo#test-info-project) and
- * [workerInfo.project](https://playwright.dev/docs/api/class-workerinfo#worker-info-project) and is passed to the
- * test reporters. To see the format of the project in the Playwright configuration file please see
- * [TestProject](https://playwright.dev/docs/api/class-testproject) instead.
+ *
  */
 export interface FullProject<TestArgs = {}, WorkerArgs = {}> {
   /**
@@ -743,47 +739,47 @@ export interface FullProject<TestArgs = {}, WorkerArgs = {}> {
   /**
    * See [testProject.dependencies](https://playwright.dev/docs/api/class-testproject#test-project-dependencies).
    */
-  dependencies: Array<string>;
+  dependencies?: Array<string>;
 
   /**
    * See [testProject.grep](https://playwright.dev/docs/api/class-testproject#test-project-grep).
    */
-  grep: RegExp|Array<RegExp>;
+  grep?: RegExp|Array<RegExp>;
 
   /**
    * See [testProject.grepInvert](https://playwright.dev/docs/api/class-testproject#test-project-grep-invert).
    */
-  grepInvert: null|RegExp|Array<RegExp>;
+  grepInvert?: RegExp|Array<RegExp>;
 
   /**
    * See [testProject.metadata](https://playwright.dev/docs/api/class-testproject#test-project-metadata).
    */
-  metadata: Metadata;
+  metadata?: Metadata;
 
   /**
    * See [testProject.name](https://playwright.dev/docs/api/class-testproject#test-project-name).
    */
-  name: string;
+  name?: string;
 
   /**
    * See [testProject.outputDir](https://playwright.dev/docs/api/class-testproject#test-project-output-dir).
    */
-  outputDir: string;
+  outputDir?: string;
 
   /**
    * See [testProject.repeatEach](https://playwright.dev/docs/api/class-testproject#test-project-repeat-each).
    */
-  repeatEach: number;
+  repeatEach?: number;
 
   /**
    * See [testProject.retries](https://playwright.dev/docs/api/class-testproject#test-project-retries).
    */
-  retries: number;
+  retries?: number;
 
   /**
    * See [testProject.snapshotDir](https://playwright.dev/docs/api/class-testproject#test-project-snapshot-dir).
    */
-  snapshotDir: string;
+  snapshotDir?: string;
 
   /**
    * See [testProject.teardown](https://playwright.dev/docs/api/class-testproject#test-project-teardown).
@@ -793,22 +789,22 @@ export interface FullProject<TestArgs = {}, WorkerArgs = {}> {
   /**
    * See [testProject.testDir](https://playwright.dev/docs/api/class-testproject#test-project-test-dir).
    */
-  testDir: string;
+  testDir?: string;
 
   /**
    * See [testProject.testIgnore](https://playwright.dev/docs/api/class-testproject#test-project-test-ignore).
    */
-  testIgnore: string|RegExp|Array<string|RegExp>;
+  testIgnore?: string|RegExp|Array<string|RegExp>;
 
   /**
    * See [testProject.testMatch](https://playwright.dev/docs/api/class-testproject#test-project-test-match).
    */
-  testMatch: string|RegExp|Array<string|RegExp>;
+  testMatch?: string|RegExp|Array<string|RegExp>;
 
   /**
    * See [testProject.timeout](https://playwright.dev/docs/api/class-testproject#test-project-timeout).
    */
-  timeout: number;
+  timeout?: number;
 }
 
 type LiteralUnion<T extends U, U = string> = T | (U & { zz_IGNORE_ME?: never });
@@ -1913,14 +1909,11 @@ export interface Config<TestArgs = {}, WorkerArgs = {}> extends TestConfig<TestA
 export type Metadata = { [key: string]: any };
 
 /**
- * Resolved configuration which is accessible via
- * [testInfo.config](https://playwright.dev/docs/api/class-testinfo#test-info-config) and is passed to the test
- * reporters. To see the format of Playwright configuration file, please see
- * [TestConfig](https://playwright.dev/docs/api/class-testconfig) instead.
+ *
  */
 export interface FullConfig<TestArgs = {}, WorkerArgs = {}> {
   /**
-   * List of resolved projects.
+   * See [testConfig.projects](https://playwright.dev/docs/api/class-testconfig#test-config-projects).
    */
   projects: FullProject<TestArgs, WorkerArgs>[];
   /**
@@ -1932,120 +1925,99 @@ export interface FullConfig<TestArgs = {}, WorkerArgs = {}> {
    */
   webServer: TestConfigWebServer | null;
   /**
-   * Path to the configuration file used to run the tests. The value is an empty string if no config file was used.
-   */
-  configFile?: string;
-
-  /**
    * See [testConfig.forbidOnly](https://playwright.dev/docs/api/class-testconfig#test-config-forbid-only).
    */
-  forbidOnly: boolean;
+  forbidOnly?: boolean;
 
   /**
    * See [testConfig.fullyParallel](https://playwright.dev/docs/api/class-testconfig#test-config-fully-parallel).
    */
-  fullyParallel: boolean;
+  fullyParallel?: boolean;
 
   /**
    * See [testConfig.globalSetup](https://playwright.dev/docs/api/class-testconfig#test-config-global-setup).
    */
-  globalSetup: null|string;
+  globalSetup?: string|Array<string>;
 
   /**
    * See [testConfig.globalTeardown](https://playwright.dev/docs/api/class-testconfig#test-config-global-teardown).
    */
-  globalTeardown: null|string;
+  globalTeardown?: string|Array<string>;
 
   /**
    * See [testConfig.globalTimeout](https://playwright.dev/docs/api/class-testconfig#test-config-global-timeout).
    */
-  globalTimeout: number;
+  globalTimeout?: number;
 
   /**
    * See [testConfig.grep](https://playwright.dev/docs/api/class-testconfig#test-config-grep).
    */
-  grep: RegExp|Array<RegExp>;
+  grep?: RegExp|Array<RegExp>;
 
   /**
    * See [testConfig.grepInvert](https://playwright.dev/docs/api/class-testconfig#test-config-grep-invert).
    */
-  grepInvert: null|RegExp|Array<RegExp>;
+  grepInvert?: RegExp|Array<RegExp>;
 
   /**
    * See [testConfig.maxFailures](https://playwright.dev/docs/api/class-testconfig#test-config-max-failures).
    */
-  maxFailures: number;
+  maxFailures?: number;
 
   /**
    * See [testConfig.metadata](https://playwright.dev/docs/api/class-testconfig#test-config-metadata).
    */
-  metadata: Metadata;
+  metadata?: Metadata;
 
   /**
    * See [testConfig.preserveOutput](https://playwright.dev/docs/api/class-testconfig#test-config-preserve-output).
    */
-  preserveOutput: "always"|"never"|"failures-only";
+  preserveOutput?: "always"|"never"|"failures-only";
 
   /**
    * See [testConfig.quiet](https://playwright.dev/docs/api/class-testconfig#test-config-quiet).
    */
-  quiet: boolean;
+  quiet?: boolean;
 
   /**
    * See [testConfig.reportSlowTests](https://playwright.dev/docs/api/class-testconfig#test-config-report-slow-tests).
    */
-  reportSlowTests: null|{
+  reportSlowTests?: null|{
     /**
-     * The maximum number of slow test files to report.
+     * The maximum number of slow test files to report. Defaults to `5`.
      */
     max: number;
 
     /**
-     * Test file duration in milliseconds that is considered slow.
+     * Test file duration in milliseconds that is considered slow. Defaults to 5 minutes.
      */
     threshold: number;
   };
 
   /**
-   * Base directory for all relative paths used in the reporters.
-   */
-  rootDir: string;
-
-  /**
    * See [testConfig.shard](https://playwright.dev/docs/api/class-testconfig#test-config-shard).
    */
-  shard: null|{
-    /**
-     * The total number of shards.
-     */
-    total: number;
-
+  shard?: null|{
     /**
      * The index of the shard to execute, one-based.
      */
     current: number;
+
+    /**
+     * The total number of shards.
+     */
+    total: number;
   };
 
   /**
    * See [testConfig.updateSnapshots](https://playwright.dev/docs/api/class-testconfig#test-config-update-snapshots).
    */
-  updateSnapshots: "all"|"changed"|"missing"|"none";
-
-  /**
-   * See
-   * [testConfig.updateSourceMethod](https://playwright.dev/docs/api/class-testconfig#test-config-update-source-method).
-   */
-  updateSourceMethod: "overwrite"|"3way"|"patch";
-
-  /**
-   * Playwright version.
-   */
-  version: string;
+  updateSnapshots?: "all"|"changed"|"missing"|"none";
 
   /**
    * See [testConfig.workers](https://playwright.dev/docs/api/class-testconfig#test-config-workers).
    */
-  workers: number;
+  workers?: number|string;
 }
 
 /**
