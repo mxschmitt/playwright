@@ -77,6 +77,7 @@ it.describe('pause', () => {
       await page.pause({ __testHookKeepTestTimeout: true });
     })();
     const recorderPage = await recorderPageGetter();
+    await recorderPage.locator('[title="Resume (F8)"]').waitFor();
     await recorderPage.keyboard.press('F8');
     await scriptPromise;
   });
