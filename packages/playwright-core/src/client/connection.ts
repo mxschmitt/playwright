@@ -67,7 +67,7 @@ export class Connection extends EventEmitter {
   readonly _objects = new Map<string, ChannelOwner>();
   onmessage = (message: object): void => {};
   private _lastId = 0;
-  private _callbacks = new Map<number, { resolve: (a: any) => void, reject: (a: Error) => void, title: string | undefined, type: string, method: string }>();
+  private _callbacks = new Map<number, { resolve: (a: any) => void, reject: (a: Error) => void, title: string | undefined, type: string, method: string, timestamp: number, timeoutId?: NodeJS.Timeout }>();
   private _rootObject: Root;
   private _closedError: Error | undefined;
   private _isRemote = false;
@@ -79,6 +79,7 @@ export class Connection extends EventEmitter {
   readonly _instrumentation: ClientInstrumentation;
   // Used from @playwright/test fixtures -> TODO remove?
   readonly headers: HeadersArray;
+  private _callbackTimeoutMs = 30000; // 30 seconds timeout for callbacks
 
   constructor(platform: Platform, localUtils?: LocalUtils, instrumentation?: ClientInstrumentation, headers: HeadersArray = []) {
     super(platform);
@@ -144,7 +145,25 @@ export class Connection extends EventEmitter {
     // We need to exit zones before calling into the server, otherwise
     // when we receive events from the server, we would be in an API zone.
     this._platform.zones.empty.run(() => this.onmessage({ ...message, metadata }));
-    return await new Promise((resolve, reject) => this._callbacks.set(id, { resolve, reject, title: options.title, type, method }));
+    return await new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        const callback = this._callbacks.get(id);
+        if (callback) {
+          this._callbacks.delete(id);
+          callback.reject(new Error(`Request ${method} (${id}) timed out after ${this._callbackTimeoutMs}ms`));
+        }
+      }, this._callbackTimeoutMs);
+      
+      this._callbacks.set(id, { 
+        resolve, 
+        reject, 
+        title: options.title, 
+        type, 
+        method, 
+        timestamp: Date.now(),
+        timeoutId
+      });
+    });
   }
 
   private _validatorFromWireContext(): ValidatorContext {
@@ -167,6 +186,12 @@ export class Connection extends EventEmitter {
       if (!callback)
         throw new Error(`Cannot find command to respond: ${id}`);
       this._callbacks.delete(id);
+      
+      // Clear the timeout since we received a response
+      if (callback.timeoutId) {
+        clearTimeout(callback.timeoutId);
+      }
+      
       if (error && !result) {
         const parsedError = parseError(error);
         rewriteErrorMessage(parsedError, parsedError.message + formatCallLog(this._platform, log));
@@ -210,8 +235,13 @@ export class Connection extends EventEmitter {
     if (this._closedError)
       return;
     this._closedError = new TargetClosedError(cause);
-    for (const callback of this._callbacks.values())
+    for (const callback of this._callbacks.values()) {
+      // Clear any pending timeouts
+      if (callback.timeoutId) {
+        clearTimeout(callback.timeoutId);
+      }
       callback.reject(this._closedError);
+    }
     this._callbacks.clear();
     this.emit('close');
   }

@@ -285,22 +285,65 @@ export function parseUnserializableValue(unserializableValue: string): any {
     return -0;
 }
 
+// Safe function syntax validation without executing code
+function validateFunctionSyntax(functionStr: string): boolean {
+  // Basic syntax validation without using Function constructor
+  const trimmed = functionStr.trim();
+  
+  // Check for basic function patterns
+  const asyncFunctionPattern = /^async\s+function\s*\w*\s*\([^)]*\)\s*\{/;
+  const functionPattern = /^function\s*\w*\s*\([^)]*\)\s*\{/;
+  const arrowFunctionPattern = /^(\([^)]*\)|[^=\s]+)\s*=>\s*[\{\(]/;
+  const asyncArrowFunctionPattern = /^async\s+(\([^)]*\)|[^=\s]+)\s*=>\s*[\{\(]/;
+  
+  // Check if it matches valid function patterns
+  if (asyncFunctionPattern.test(trimmed) || 
+      functionPattern.test(trimmed) || 
+      arrowFunctionPattern.test(trimmed) || 
+      asyncArrowFunctionPattern.test(trimmed)) {
+    return true;
+  }
+  
+  // Check for basic balanced braces/parens (simple validation)
+  let braceCount = 0;
+  let parenCount = 0;
+  let inString = false;
+  let stringChar = '';
+  
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i];
+    const prevChar = i > 0 ? trimmed[i - 1] : '';
+    
+    if (!inString && (char === '"' || char === "'" || char === '`')) {
+      inString = true;
+      stringChar = char;
+    } else if (inString && char === stringChar && prevChar !== '\\') {
+      inString = false;
+      stringChar = '';
+    } else if (!inString) {
+      if (char === '{') braceCount++;
+      else if (char === '}') braceCount--;
+      else if (char === '(') parenCount++;
+      else if (char === ')') parenCount--;
+    }
+  }
+  
+  return braceCount === 0 && parenCount === 0;
+}
+
 export function normalizeEvaluationExpression(expression: string, isFunction: boolean | undefined): string {
   expression = expression.trim();
 
   if (isFunction) {
-    try {
-      new Function('(' + expression + ')');
-    } catch (e1) {
+    if (!validateFunctionSyntax(expression)) {
       // This means we might have a function shorthand. Try another
       // time prefixing 'function '.
       if (expression.startsWith('async '))
         expression = 'async function ' + expression.substring('async '.length);
       else
         expression = 'function ' + expression;
-      try {
-        new Function('(' + expression  + ')');
-      } catch (e2) {
+      
+      if (!validateFunctionSyntax(expression)) {
         // We tried hard to serialize, but there's a weird beast here.
         throw new Error('Passed function is not well-serializable!');
       }

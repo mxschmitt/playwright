@@ -64,7 +64,17 @@ export function httpRequest(params: HTTPRequestParams, onResponse: (r: http.Inco
   }
 
   let cancelRequest: (e: Error | undefined) => void;
+  let timeoutId: NodeJS.Timeout | undefined;
+  
+  const clearRequestTimeout = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = undefined;
+    }
+  };
+  
   const requestCallback = (res: http.IncomingMessage) => {
+    clearRequestTimeout(); // Clear timeout when response is received
     const statusCode = res.statusCode || 0;
     if (statusCode >= 300 && statusCode < 400 && res.headers.location) {
       // Close the original socket before following the redirect. Otherwise
@@ -78,14 +88,20 @@ export function httpRequest(params: HTTPRequestParams, onResponse: (r: http.Inco
   const request = options.protocol === 'https:' ?
     https.request(parsedUrl, options, requestCallback) :
     http.request(parsedUrl, options, requestCallback);
-  request.on('error', onError);
+  request.on('error', (err) => {
+    clearRequestTimeout(); // Clear timeout on error
+    onError(err);
+  });
   if (params.socketTimeout !== undefined) {
-    request.setTimeout(params.socketTimeout, () =>  {
+    timeoutId = setTimeout(() => {
       onError(new Error(`Request to ${params.url} timed out after ${params.socketTimeout}ms`));
       request.abort();
-    });
+    }, params.socketTimeout);
   }
-  cancelRequest = e => request.destroy(e);
+  cancelRequest = e => {
+    clearRequestTimeout(); // Clear timeout when request is cancelled
+    request.destroy(e);
+  };
   request.end(params.data);
   return { cancel: e => cancelRequest(e) };
 }
