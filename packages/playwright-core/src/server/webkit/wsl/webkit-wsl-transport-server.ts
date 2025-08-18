@@ -18,9 +18,10 @@
 import net from 'net';
 import { spawn } from 'child_process';
 
-// Start a TCP server to bridge between parent (fd3/fd4) and the WSL child process.
-// This is needed because wsl.exe only supports up to 3 forwarded fds, so we can’t
-// pass extra pipes directly and must tunnel them over a socket instead.
+// Bridge between parent (fd3/fd4) and the WSL child process by multiplexing over
+// stdin/stdout. We frame data as: [channel:1][length:4-be][payload].
+// The channel of interest (transport) is always identified at the start of each
+// framed chunk that is sent over the wire.
 
 (async () => {
   const argv = process.argv.slice(2);
@@ -32,50 +33,24 @@ import { spawn } from 'child_process';
   const parentIn  = new net.Socket({ fd: 3, readable: true,  writable: false }); // parent -> us
   const parentOut = new net.Socket({ fd: 4, readable: false, writable: true  }); // us -> parent
 
-  const server = net.createServer();
+  // Channel ids. We currently only use TRANSPORT.
+  const CHANNEL = {
+    TRANSPORT: 1,
+  } as const;
 
-  const sockets = new Set<net.Socket>();
-  server.on('connection', socket => {
-    // Disable Nagle's algorithm to reduce latency for small, frequent messages.
-    socket.setNoDelay(true);
-    if (sockets.size > 0) {
-      log('Extra connection received, destroying.');
-      socket.destroy();
-      return;
-    }
-    sockets.add(socket);
-    log('Client connected, wiring pipes.');
-
-    socket.pipe(parentOut);
-    parentIn.pipe(socket);
-
-    socket.on('close', () => {
-      log('Socket closed');
-      sockets.delete(socket);
-    });
-  });
-
-  await new Promise((resolve, reject) => {
-    server.once('error', reject);
-    server.listen(0, () => resolve(null));
-  });
-  const address = server.address();
-  if (!address || typeof address === 'string') {
-    console.error('Failed to obtain listening address');
-    process.exit(1);
+  // Helper to build a framed buffer: [channel (1)][length (4, BE)][payload]
+  function frame(channel: number, payload: Buffer): Buffer {
+    const header = Buffer.allocUnsafe(5);
+    header[0] = channel & 0xFF;
+    header.writeUInt32BE(payload.length, 1);
+    return Buffer.concat([header, payload]);
   }
-  const port = address.port;
-  log('Server listening on', port);
 
-  // Spawn child process with augmented env. PW_WSL_BRIDGE_PORT is added to WSLENV
-  // so this environment variable is propagated across Windows <-> WSL boundaries.
-  // This does not forward the TCP port itself, only the env var containing it.
-  const env = {
-    ...process.env,
-    // WSLENV is a colon-delimited list of environment variables that should be included when launching WSL processes from Win32 or Win32 processes from WSL
-    WSLENV: 'PW_WSL_BRIDGE_PORT',
-    PW_WSL_BRIDGE_PORT: String(port),
-  };
+  // Parser state for child stdout -> parentOut
+  let rxBuffer = Buffer.alloc(0);
+
+  // Spawn child process with piped stdio for framing over stdin/stdout.
+  const env = { ...process.env };
 
   let shuttingDown = false;
 
@@ -90,10 +65,47 @@ import { spawn } from 'child_process';
     ...argv,
   ], {
     env,
-    stdio: ['inherit', 'inherit', 'inherit'], // no fd3/fd4 here; they stay only in this wrapper
+    // We communicate with WSL-side client via stdin/stdout pipes.
+    stdio: ['pipe', 'pipe', 'inherit'],
   });
 
   log('Spawned child pid', child.pid);
+
+  const childStdin = child.stdin!;
+  const childStdout = child.stdout!;
+
+  // Wire parentIn (fd3) -> child stdin (framed)
+  parentIn.on('data', chunk => {
+    const packet = frame(CHANNEL.TRANSPORT, chunk);
+    if (!childStdin.write(packet))
+      parentIn.pause();
+  });
+  childStdin.on('drain', () => parentIn.resume());
+  parentIn.on('close', () => childStdin.end());
+
+  // Wire child stdout (framed) -> parentOut (fd4)
+  childStdout.on('data', data => {
+    rxBuffer = Buffer.concat([rxBuffer, data]);
+    // Parse as many frames as available.
+    while (rxBuffer.length >= 5) {
+      const channel = rxBuffer[0];
+      const length = rxBuffer.readUInt32BE(1);
+      if (rxBuffer.length < 5 + length)
+        break; // wait for more data
+      const payload = rxBuffer.subarray(5, 5 + length);
+      rxBuffer = rxBuffer.subarray(5 + length);
+      if (channel === CHANNEL.TRANSPORT) {
+        if (!parentOut.write(payload)) {
+          // Backpressure: pause reading from child until drained.
+          childStdout.pause();
+          parentOut.once('drain', () => childStdout.resume());
+        }
+      } else {
+        // Unknown channel, ignore for now.
+      }
+    }
+  });
+  childStdout.on('end', () => parentOut.end());
 
   child.on('close', (code, signal) => {
     log('Child exit', { code, signal });
@@ -113,15 +125,12 @@ import { spawn } from 'child_process';
 
     parentIn.destroy();
     parentOut.destroy();
-
-    // Close listener and destroy any sockets
-    await new Promise(resolve => server.close(() => resolve(null)));
-    for (const socket of sockets)
-      socket.destroy();
+    childStdin.destroy();
+    childStdout.destroy();
   }
 
   function log(...args: any[]) {
-    console.error(new Date(), '[webkit-wsl-host-wrapper]', ...args);
+    console.error(new Date(), '[webkit-wsl-transport-server]', ...args);
   }
 })().catch(error => {
   console.error('Error occurred:', error);

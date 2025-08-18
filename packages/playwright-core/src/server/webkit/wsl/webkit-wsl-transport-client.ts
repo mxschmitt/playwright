@@ -16,58 +16,69 @@
 // @ts-check
 /* eslint-disable no-restricted-properties */
 /* eslint-disable no-console */
-import net from 'net';
 import fs from 'fs';
-import { spawn, spawnSync } from 'child_process';
+import { spawn } from 'child_process';
 
 (async () => {
-  const { PW_WSL_BRIDGE_PORT: socketPort, ...childEnv } = process.env;
-  if (!socketPort)
-    throw new Error('PW_WSL_BRIDGE_PORT env var is not set');
+  const childEnv = process.env;
 
   const [executable, ...args] = process.argv.slice(2);
 
   if (!(await fs.promises.stat(executable)).isFile())
     throw new Error(`Executable does not exist. Did you update Playwright recently? Make sure to run npx playwright install webkit-wsl`);
 
-  const address = (() => {
-    const res = spawnSync('/usr/bin/wslinfo', ['--networking-mode'], { encoding: 'utf8' });
-    if (res.error || res.status !== 0)
-      throw new Error(`Failed to run /usr/bin/wslinfo --networking-mode: ${res.error?.message || res.stderr || res.status}`);
-    if (res.stdout.trim() === 'nat') {
-      const ipRes = spawnSync('/usr/sbin/ip', ['route', 'show'], { encoding: 'utf8' });
-      if (ipRes.error || ipRes.status !== 0)
-        throw new Error(`Failed to run ip route show: ${ipRes.error?.message || ipRes.stderr || ipRes.status}`);
-      const ip = ipRes.stdout.trim().split('\n').find(line => line.includes('default'))?.split(' ')[2];
-      if (!ip)
-        throw new Error('Could not determine WSL IP address (NAT mode).');
-      return ip;
-    }
-    return '127.0.0.1';
-  })();
+  // Channel ids. We currently only use TRANSPORT.
+  const CHANNEL = {
+    TRANSPORT: 1,
+  } as const;
 
-  const socket = net.createConnection(parseInt(socketPort, 10), address);
-  // Disable Nagle's algorithm to reduce latency for small, frequent messages.
-  socket.setNoDelay(true);
-
-  await new Promise((resolve, reject) => {
-    socket.on('connect', resolve);
-    socket.on('error', reject);
-  });
+  // Helper to build a framed buffer: [channel (1)][length (4, BE)][payload]
+  function frame(channel: number, payload: Buffer): Buffer {
+    const header = Buffer.allocUnsafe(5);
+    header[0] = channel & 0xFF;
+    header.writeUInt32BE(payload.length, 1);
+    return Buffer.concat([header, payload]);
+  }
 
   const child = spawn(executable, args, {
     stdio: ['inherit', 'inherit', 'inherit', 'pipe', 'pipe'],
     env: childEnv,
   });
 
-  const [writePipe, readPipe] = [child.stdio[3] as NodeJS.WritableStream, child.stdio[4] as NodeJS.ReadableStream];
-  socket.pipe(writePipe);
-  readPipe.pipe(socket);
+  const [readPipe, writePipe] = [child.stdio[4] as NodeJS.ReadableStream, child.stdio[3] as NodeJS.WritableStream];
 
-  socket.on('end', () => child.kill());
+  // Parser state for stdin -> child writePipe
+  let rxBuffer = Buffer.alloc(0);
+  process.stdin.resume();
+  process.stdin.on('data', data => {
+    rxBuffer = Buffer.concat([rxBuffer, data]);
+    while (rxBuffer.length >= 5) {
+      const channel = rxBuffer[0];
+      const length = rxBuffer.readUInt32BE(1);
+      if (rxBuffer.length < 5 + length)
+        break;
+      const payload = rxBuffer.subarray(5, 5 + length);
+      rxBuffer = rxBuffer.subarray(5 + length);
+      if (channel === CHANNEL.TRANSPORT) {
+        if (!writePipe.write(payload))
+          process.stdin.pause();
+      } else {
+        // Ignore unknown channels for now.
+      }
+    }
+  });
+  writePipe.on('drain', () => process.stdin.resume());
+  process.stdin.on('end', () => writePipe.end());
 
+  // child readPipe -> stdout (framed)
+  readPipe.on('data', chunk => {
+    const packet = frame(CHANNEL.TRANSPORT, Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as any));
+    if (!process.stdout.write(packet))
+      readPipe.pause();
+  });
+  process.stdout.on('drain', () => readPipe.resume());
+  readPipe.on('end', () => process.stdout.end());
   child.on('exit', exitCode => {
-    socket.end();
     process.exit(exitCode || 0);
   });
 
