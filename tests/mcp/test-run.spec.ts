@@ -164,3 +164,83 @@ Running 3 tests using 1 worker
   ok 3 [id=<ID>] [project=chromium] › example.test.ts:6:11 › example2 (XXms)
   3 passed (XXms)`);
 });
+
+test('test_run should stop when aborted', async ({ startClient }) => {
+  await writeFiles({
+    'slow.test.ts': `
+      import { test, expect } from '@playwright/test';
+      test('slow test', async () => {
+        await new Promise(resolve => setTimeout(resolve, 30000));
+      });
+    `,
+  });
+
+  const { client } = await startClient();
+
+  const abortController = new AbortController();
+
+  // Start the test run
+  const startTime = Date.now();
+  const testRunPromise = client.callTool({
+    name: 'test_run',
+  }, undefined, { signal: abortController.signal });
+
+  // Wait a bit for the test to start, then abort
+  await new Promise(resolve => setTimeout(resolve, 500));
+  abortController.abort();
+
+  // The call should reject with an abort error
+  await expect(testRunPromise).rejects.toThrow(/abort/i);
+
+  // Verify the abort happened quickly (not after 30 seconds)
+  const elapsed = Date.now() - startTime;
+  expect(elapsed).toBeLessThan(5000);
+});
+
+test('test_run should allow starting a new run immediately after abort', async ({ startClient }) => {
+  await writeFiles({
+    'slow.test.ts': `
+      import { test } from '@playwright/test';
+      test('slow test', async () => {
+        await new Promise(resolve => setTimeout(resolve, 30000));
+      });
+    `,
+    'fast.test.ts': `
+      import { test, expect } from '@playwright/test';
+      test('fast test', async () => {
+        expect(1 + 1).toBe(2);
+      });
+    `,
+  });
+
+  const { client } = await startClient();
+  const abortController = new AbortController();
+
+  const firstRunPromise = client.callTool({
+    name: 'test_run',
+    arguments: {
+      locations: ['slow.test.ts'],
+    },
+  }, undefined, { signal: abortController.signal });
+  const firstRunResult = firstRunPromise.then(
+    () => ({ type: 'resolved' as const }),
+    error => ({ type: 'rejected' as const, error }),
+  );
+
+  await new Promise(resolve => setTimeout(resolve, 500));
+  abortController.abort();
+
+  const secondRun = await client.callTool({
+    name: 'test_run',
+    arguments: {
+      locations: ['fast.test.ts'],
+    },
+  });
+
+  const firstResult = await firstRunResult;
+  expect(firstResult.type).toBe('rejected');
+  expect(String(firstResult.error)).toMatch(/abort/i);
+  const text = secondRun.content[0].text;
+  expect(text).toContain('1 passed');
+  expect(text).toContain('fast.test.ts:3:11');
+});

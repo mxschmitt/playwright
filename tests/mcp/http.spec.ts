@@ -365,10 +365,9 @@ test('client should receive list roots request', async ({ serverEndpoint, server
 });
 
 test('should not allow rebinding to localhost', async ({ serverEndpoint }) => {
-  const { url, stderr } = await serverEndpoint();
+  const { url } = await serverEndpoint();
   const ip = await resolveToIp('localhost');
   const response = await fetch(url.href.replace('localhost', ip));
-  console.log('logs:', stderr());
   expect.soft(response.status).toBe(403);
   expect.soft(await response.text()).toContain('Access is only allowed at localhost');
 });
